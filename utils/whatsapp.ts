@@ -6,7 +6,7 @@ export function generateWhatsAppLink(
   paymentMethod: string, 
   changeValue?: string
 ) {
-  const phone = "5522998184401"; // Seu número
+  const phone = "5522981573795"; // Seu número
   
   let message = `*NOVO PEDIDO - ISA SUSHI* 🍣\n\n`;
   
