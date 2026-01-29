@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export function WhatsAppButton() {
-  const phoneNumber = "22981573795"; // Seu número
+  const phoneNumber = "5522981573795"; 
   const message = encodeURIComponent("Olá Isa Sushi, gostaria de tirar uma dúvida.");
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
@@ -9,15 +9,14 @@ export function WhatsAppButton() {
     <Link
       href={whatsappUrl}
       target="_blank"
-      className="fixed bottom-24 right-4 z-50 animate-bounce-slow group"
+      // MUDANÇA AQUI: De bottom-24 para bottom-40 (fica bem mais alto)
+      className="fixed bottom-40 right-4 z-50 animate-bounce-slow group"
       aria-label="Falar no WhatsApp"
     >
       <div className="bg-[#25D366] p-4 rounded-full shadow-lg hover:brightness-110 transition-all hover:scale-110 flex items-center justify-center relative">
         
-        {/* Efeito de "Onda" (Pulse) */}
         <span className="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-75 animate-ping duration-1000"></span>
         
-        {/* Ícone do WhatsApp Oficial (SVG preenchido) */}
         <svg 
           width="32" 
           height="32" 
@@ -29,7 +28,6 @@ export function WhatsAppButton() {
         </svg>
       </div>
 
-      {/* Tooltip (Texto que aparece ao passar o mouse) */}
       <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-white text-gray-800 text-xs font-bold rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
         Fale Conosco
       </span>
