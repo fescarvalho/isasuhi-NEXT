@@ -8,7 +8,7 @@ export function Header() {
           - md:w-80: Aumenta para 320px em telas maiores
           - max-w-full: Garante que nunca ultrapasse a largura da tela 
       */}
-      <div className="relative w-64 md:w-80 h-32 md:h-40 mb-4 max-w-full">
+      <div className="relative w-124 md:w-80 h-62 md:h-40 mb-4 max-w-full">
         <Image 
           src="/logo.png" 
           alt="Isa Sushi Logo" 
