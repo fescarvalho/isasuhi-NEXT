@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Paleta de Cores Refinada */
+  --color-sushi-red: #d32f2f;
+  --color-sushi-darkRed: #3b0d0d;
+  --color-sushi-black: #121212;
+  --color-sushi-card: #ffffff;
+  --color-sushi-accent: #ff4747; /* Vermelho mais vivo para botões */
+  --color-sushi-gold: #f59e0b;   /* Dourado para detalhes/estrelas */
+  --color-sushi-bg: #f9f9f7;     /* Fundo "Arroz" (Cream) */
+  
+  /* Fontes */
+  --font-sans: var(--font-poppins);
+  --font-display: var(--font-josefin);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Animações Personalizadas */
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-fade-up: fadeUp 0.5s ease-out forwards;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 
+/* Reset e Estilos Base */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-sushi-bg);
+  color: var(--color-sushi-black);
+  /* Textura sutil de fundo (opcional) */
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar Bonita */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Remove a scrollbar dos menus horizontais no celular */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+vercel-live-feedback,
+#vercel-toolbar,
+div[data-nextjs-toast] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+nextjs-portal {
+  display: none !important;
 }
