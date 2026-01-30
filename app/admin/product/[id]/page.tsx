@@ -11,13 +11,11 @@ interface Props {
 export default async function ProductFormPage({ params }: Props) {
   // Em Next.js 15, params deve ser aguardado
   const { id } = await params;
-  
+
   const isNew = id === "new";
 
   // Busca o produto se for edição
-  const product = !isNew
-    ? await prisma.product.findUnique({ where: { id } })
-    : null;
+  const product = !isNew ? await prisma.product.findUnique({ where: { id } }) : null;
 
   // Busca categorias para o select
   const categories = await prisma.category.findMany({ orderBy: { order: "asc" } });
@@ -26,7 +24,10 @@ export default async function ProductFormPage({ params }: Props) {
     <div className="min-h-screen bg-gray-50 p-8 flex justify-center">
       <div className="w-full max-w-2xl">
         <div className="mb-6">
-          <Link href="/admin" className="flex items-center text-gray-500 hover:text-gray-800 mb-2">
+          <Link
+            href="/admin"
+            className="flex items-center text-gray-500 hover:text-gray-800 mb-2"
+          >
             <ArrowLeft size={16} className="mr-1" /> Voltar
           </Link>
           <h1 className="text-3xl font-bold text-gray-800">
@@ -34,13 +35,18 @@ export default async function ProductFormPage({ params }: Props) {
           </h1>
         </div>
 
-        <form action={saveProduct} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+        <form
+          action={saveProduct}
+          className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4"
+        >
           {/* ID Oculto (se for edição) */}
           {!isNew && <input type="hidden" name="id" value={product?.id} />}
 
           {/* Nome */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nome do Produto
+            </label>
             <input
               name="name"
               defaultValue={product?.name}
@@ -52,7 +58,9 @@ export default async function ProductFormPage({ params }: Props) {
 
           {/* Descrição */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descrição
+            </label>
             <textarea
               name="description"
               defaultValue={product?.description || ""}
@@ -65,7 +73,9 @@ export default async function ProductFormPage({ params }: Props) {
           <div className="grid grid-cols-2 gap-4">
             {/* Preço */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Preço (R$)
+              </label>
               <input
                 name="price"
                 type="number"
@@ -79,7 +89,9 @@ export default async function ProductFormPage({ params }: Props) {
 
             {/* Categoria */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoria
+              </label>
               <select
                 name="categoryId"
                 defaultValue={product?.categoryId}
@@ -96,14 +108,18 @@ export default async function ProductFormPage({ params }: Props) {
 
           {/* URL da Imagem (Opcional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL da Imagem</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              URL da Imagem
+            </label>
             <input
               name="imageUrl"
               defaultValue={product?.imageUrl || ""}
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="https://..."
             />
-            <p className="text-xs text-gray-400 mt-1">Cole um link de imagem ou deixe em branco.</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Cole um link de imagem ou deixe em branco.
+            </p>
           </div>
 
           {/* Botão Salvar */}

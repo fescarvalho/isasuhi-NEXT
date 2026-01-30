@@ -1,91 +1,126 @@
-// app/admin/page.tsx
 import { prisma } from "@/lib/prisma";
+import { AdminNav } from "@/components/admin-nav";
+import { DollarSign, ShoppingBag, UtensilsCrossed, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { deleteProduct } from "@/app/actions";
-import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export default async function AdminDashboard() {
+  // 1. Definição de Datas
+  const now = new Date();
 
-export default async function AdminPage() {
-  const products = await prisma.product.findMany({
-    include: { category: true },
-    orderBy: { category: { order: "asc" } },
+  // Início do Dia (Hoje 00:00)
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Início do Mês (Dia 1 00:00)
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // 2. Consultas ao Banco de Dados (Agregações)
+
+  // Vendas do DIA
+  const salesToday = await prisma.order.aggregate({
+    _sum: { total: true },
+    _count: { id: true },
+    where: {
+      createdAt: { gte: startOfDay },
+      status: { not: "CANCELADO" }, // Ignora cancelados se houver essa lógica futura
+    },
   });
 
+  // Vendas do MÊS
+  const salesMonth = await prisma.order.aggregate({
+    _sum: { total: true },
+    _count: { id: true },
+    where: {
+      createdAt: { gte: startOfMonth },
+      status: { not: "CANCELADO" },
+    },
+  });
+
+  // Função para formatar dinheiro
+  const formatMoney = (val: number | null) => {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
+      val || 0,
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Cabeçalho */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <Link href="/" className="flex items-center text-gray-500 hover:text-red-600 mb-2">
-              <ArrowLeft size={16} className="mr-1" /> Voltar ao Site
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-800">Painel Administrativo</h1>
+    <div className="min-h-screen bg-gray-50">
+      <AdminNav />
+
+      <div className="p-6 max-w-5xl mx-auto">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 font-display">
+          Visão Geral
+        </h2>
+
+        {/* --- AREA DE RELATÓRIOS (CARDS) --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          {/* Card: Hoje */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+                Vendas Hoje
+              </p>
+              <h3 className="text-3xl font-bold text-sushi-black mt-1">
+                {formatMoney(salesToday._sum.total)}
+              </h3>
+              <p className="text-sm text-gray-400 mt-2 flex items-center gap-1">
+                <ShoppingBag size={14} /> {salesToday._count.id} pedidos realizados
+              </p>
+            </div>
+            <div className="bg-green-100 p-4 rounded-full text-green-600">
+              <TrendingUp size={32} />
+            </div>
           </div>
-          <Link
-            href="/admin/product/new"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 font-bold"
-          >
-            <Plus size={20} /> Novo Produto
-          </Link>
+
+          {/* Card: Mês */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+                Faturamento Mês
+              </p>
+              <h3 className="text-3xl font-bold text-sushi-black mt-1">
+                {formatMoney(salesMonth._sum.total)}
+              </h3>
+              <p className="text-sm text-gray-400 mt-2 flex items-center gap-1">
+                <ShoppingBag size={14} /> {salesMonth._count.id} pedidos no total
+              </p>
+            </div>
+            <div className="bg-blue-100 p-4 rounded-full text-blue-600">
+              <DollarSign size={32} />
+            </div>
+          </div>
         </div>
 
-        {/* Tabela de Produtos */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="p-4">Produto</th>
-                <th className="p-4">Categoria</th>
-                <th className="p-4">Preço</th>
-                <th className="p-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="p-4">
-                    <div className="font-bold text-gray-800">{product.name}</div>
-                    <div className="text-xs text-gray-500 truncate max-w-[200px]">
-                      {product.description}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {product.category.name}
-                    </span>
-                  </td>
-                  <td className="p-4 font-medium">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(Number(product.price))}
-                  </td>
-                  <td className="p-4 text-right flex justify-end gap-2">
-                    <Link
-                      href={`/admin/product/${product.id}`}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
-                      title="Editar"
-                    >
-                      <Pencil size={18} />
-                    </Link>
-                    
-                    <form action={deleteProduct}>
-                      <input type="hidden" name="id" value={product.id} />
-                      <button 
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-md" 
-                        title="Excluir"
-                        type="submit"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <h2 className="text-xl font-bold text-gray-800 mb-4 font-display">Menu Rápido</h2>
+
+        {/* --- MENU DE ACESSO RÁPIDO --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link href="/admin/pedidos" className="group">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:border-sushi-red hover:shadow-md transition-all flex flex-col items-center text-center gap-3">
+              <div className="bg-red-50 p-4 rounded-full text-sushi-red group-hover:scale-110 transition-transform">
+                <ShoppingBag size={40} />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Gerenciar Pedidos</h3>
+                <p className="text-sm text-gray-500">
+                  Ver pedidos recebidos e alterar status
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/admin/produtos" className="group">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:border-sushi-red hover:shadow-md transition-all flex flex-col items-center text-center gap-3">
+              <div className="bg-orange-50 p-4 rounded-full text-orange-600 group-hover:scale-110 transition-transform">
+                <UtensilsCrossed size={40} />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Editar Cardápio</h3>
+                <p className="text-sm text-gray-500">
+                  Adicionar, editar ou remover pratos
+                </p>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
