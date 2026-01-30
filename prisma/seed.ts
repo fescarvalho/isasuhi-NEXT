@@ -3,13 +3,12 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Limpa o banco para não duplicar dados ao rodar novamente
+
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()
 
   console.log('🌱 Iniciando a população do banco de dados...')
 
-  // 1. Categoria: Combos
   await prisma.category.create({
     data: {
       name: 'Combos',

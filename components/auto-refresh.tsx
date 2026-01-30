@@ -7,14 +7,14 @@ export function AutoRefresh() {
   const router = useRouter();
 
   useEffect(() => {
-    // Atualiza a página a cada 30 segundos
+    
     const interval = setInterval(() => {
       router.refresh();
-      console.log("Admin atualizado!"); // Só pra você saber que está rodando
+      console.log("Admin atualizado!"); 
     }, 30000);
 
     return () => clearInterval(interval);
   }, [router]);
 
-  return null; // Esse componente não mostra nada na tela, só age nos bastidores
+  return null; 
 }

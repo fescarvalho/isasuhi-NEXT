@@ -9,7 +9,7 @@ export function WhatsAppButton() {
     <Link
       href={whatsappUrl}
       target="_blank"
-      // MUDANÇA AQUI: De bottom-24 para bottom-40 (fica bem mais alto)
+    
       className="fixed bottom-40 right-4 z-50 animate-bounce-slow group"
       aria-label="Falar no WhatsApp"
     >

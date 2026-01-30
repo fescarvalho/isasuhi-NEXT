@@ -67,13 +67,10 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
             </div>
           </div>
     
-          {/* --- ÁREA DE CONTEÚDO --- */}
+
           <div className="px-4 pb-32 animate-fade-up max-w-5xl mx-auto min-h-[60vh]">
             
-            {/* ... Lógica de Destaques e Categorias igual ao anterior ... */}
-            {/* Apenas certifique-se de que o CompactCard também receba um tapa no visual se quiser, ou use o ProductCard para tudo se preferir visual uniforme */}
-          
-          {/* (Mantenha o resto do código da resposta anterior aqui dentro) */}
+
           
           {activeTab === "Destaques" && (
               <div>

@@ -1,4 +1,4 @@
-"use client"; // Importante ser client
+"use client"; 
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,9 +10,9 @@ import {
   Power,
 } from "lucide-react";
 import { toggleStoreOpen } from "@/app/actions";
-// Precisamos saber se está aberta:
-// Como AdminNav é Client Component, a melhor forma simples é passar via props ou usar um truque server action direto no form.
-// Para simplificar: vou fazer um formulário que chama a action.
+
+
+
 
 export function AdminNav({ isStoreOpen = true }: { isStoreOpen?: boolean }) {
   const pathname = usePathname();

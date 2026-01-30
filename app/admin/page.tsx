@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 import { getStoreStatus } from "@/app/actions";
 
-// --- ESSA LINHA É A MÁGICA: FORÇA A PÁGINA A ATUALIZAR SEMPRE ---
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
@@ -39,7 +38,7 @@ export default async function AdminDashboard() {
     },
   });
 
-  // Função segura para formatar dinheiro (evita erro de Decimal vs Number)
+
   const formatMoney = (val: unknown) => {
     const numberValue = Number(val) || 0;
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(

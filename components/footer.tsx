@@ -16,7 +16,6 @@ export function Footer() {
         <div className="flex items-center justify-center gap-1 text-xs opacity-60">
           <span>© Isa Sushi - Todos os direitos reservados</span>
 
-          {/* A CORREÇÃO ESTÁ AQUI: prefetch={false} */}
           <Link
             href="/admin"
             prefetch={false}

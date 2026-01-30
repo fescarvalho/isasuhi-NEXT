@@ -26,7 +26,7 @@ export function CartSidebar() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Dados do Formulário
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState({
@@ -60,7 +60,7 @@ export function CartSidebar() {
     try {
       const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood} ${address.complement ? `(${address.complement})` : ""}`;
 
-      // 1. Tenta Salvar o pedido (Se a loja estiver fechada, vai dar erro aqui)
+     
       const result = await createOrder({
         customerName: name,
         customerPhone: phone,
@@ -71,8 +71,8 @@ export function CartSidebar() {
         total: total(),
       });
 
-      // 2. Prepara mensagem do WhatsApp
-      const storePhone = "5522988255351"; // Seu número
+
+      const storePhone = "5522981573795";
       const siteUrl = window.location.origin;
       const trackingLink = `${siteUrl}/pedido/${result.orderId}`;
 
@@ -93,18 +93,18 @@ ${cart.map((item) => `${item.quantity}x ${item.name}`).join("\n")}
 *Link para acompanhar o pedido:*
 ${trackingLink}`;
 
-      // 3. Abre o Zap
+    
       const whatsappUrl = `https://wa.me/${storePhone}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, "_blank");
 
-      // 4. Limpa tudo
+     
       clearCart();
       toggleCart();
       setStep(1);
       setName("");
       setChangeFor("");
     } catch (error) {
-      // --- AQUI ESTÁ A ATUALIZAÇÃO PARA A LOJA FECHADA ---
+
       const message = error instanceof Error ? error.message : "Erro desconhecido";
       if (message.includes("LOJA_FECHADA")) {
         alert(

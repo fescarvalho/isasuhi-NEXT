@@ -9,7 +9,6 @@ import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-// Tipagem correta para os parâmetros de busca
 interface PageProps {
   searchParams: Promise<{
     nome?: string;
@@ -21,7 +20,6 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
   const isStoreOpen = await getStoreStatus();
   const { nome, data } = await searchParams;
 
-  // Construção do filtro com tipagem estrita do Prisma
   const onde: Prisma.OrderWhereInput = {};
 
   if (nome) {

@@ -23,8 +23,7 @@ export function ProductCard({ product }: ProductProps) {
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
-      
-      {/* Área da Imagem com Zoom no Hover */}
+
       <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
         {product.imageUrl ? (
           <img
@@ -38,7 +37,7 @@ export function ProductCard({ product }: ProductProps) {
           </div>
         )}
         
-        {/* Gradiente sutil em cima da imagem para o texto contrastar se necessário */}
+   
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
 

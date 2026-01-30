@@ -36,16 +36,16 @@ export async function deleteProduct(formData: FormData) {
   revalidatePath("/admin/produtos");
 }
 
-// --- LOJA ABERTA / FECHADA ---
+
 
 export async function toggleStoreOpen() {
   const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
-  const newState = settings ? !settings.isOpen : false; // Se não existir, fecha
+  const newState = settings ? !settings.isOpen : false;
 
   await prisma.storeSettings.upsert({
     where: { id: "settings" },
     update: { isOpen: newState },
-    create: { id: "settings", isOpen: false }, // Começa fechada se criar agora
+    create: { id: "settings", isOpen: false }, 
   });
 
   revalidatePath("/");
@@ -70,7 +70,7 @@ interface CreateOrderData {
 }
 
 export async function createOrder(data: CreateOrderData) {
-  // 1. VERIFICA SE A LOJA ESTÁ ABERTA ANTES DE SALVAR
+ 
   const isOpen = await getStoreStatus();
   if (!isOpen) {
     throw new Error("LOJA_FECHADA");

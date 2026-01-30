@@ -9,7 +9,7 @@ interface PageProps {
 export default async function OrderPage({ params }: PageProps) {
   const { id } = await params;
   if (!id) return notFound();
-  // Busca o pedido no banco
+ 
   const order = await prisma.order.findUnique({
     where: { id },
     include: { items: true },
@@ -17,7 +17,7 @@ export default async function OrderPage({ params }: PageProps) {
 
   if (!order) return notFound();
 
-  // Função para gerar o texto do WhatsApp
+
   const whatsappMessage = encodeURIComponent(
     `*OLÁ! ACABEI DE FAZER UM PEDIDO* 🍣
 ID: #${order.id.slice(0, 5)}...

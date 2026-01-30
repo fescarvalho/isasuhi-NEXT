@@ -27,7 +27,7 @@ export function AdminProductsList({
   const [activeCategory, setActiveCategory] = useState("TODOS");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Lógica de Filtragem: Categoria + Busca por texto
+
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
       activeCategory === "TODOS" || product.categoryId === activeCategory;
@@ -39,7 +39,7 @@ export function AdminProductsList({
     <div>
       {/* --- BARRA DE FERRAMENTAS --- */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        {/* Filtros de Categoria (Scroll Lateral no celular) */}
+  
         <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
           <button
             onClick={() => setActiveCategory("TODOS")}

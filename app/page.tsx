@@ -23,7 +23,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-white relative">
-      {/* Banner de Loja Fechada - Aparece apenas se isStoreOpen for false */}
+
       {!isStoreOpen && (
         <div className="bg-red-600 text-white w-full p-4 text-center sticky top-0 z-100 shadow-2xl flex flex-col items-center justify-center">
           <div className="flex items-center gap-2 font-bold text-lg">
@@ -38,7 +38,7 @@ export default async function Home() {
 
       <Header />
 
-      {/* Passamos os dados para o seu componente original de abas */}
+
       <MenuInterface categories={JSON.parse(JSON.stringify(categories))} />
 
       <Footer />

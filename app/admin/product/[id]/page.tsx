@@ -11,26 +11,26 @@ interface Props {
 export default async function ProductFormPage({ params }: Props) {
   const { id } = await params;
 
-  // Busca status para o Menu
+
   const isStoreOpen = await getStoreStatus();
 
   const isNew = id === "new";
 
-  // Busca o produto se for edição
+
   const product = !isNew ? await prisma.product.findUnique({ where: { id } }) : null;
 
-  // Busca categorias
+
   const categories = await prisma.category.findMany({ orderBy: { order: "asc" } });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 1. ADICIONADO: Menu do Admin no topo */}
+   
       <AdminNav isStoreOpen={isStoreOpen} />
 
       <div className="p-8 flex justify-center">
         <div className="w-full max-w-2xl">
           <div className="mb-6">
-            {/* 2. CORRIGIDO: Volta para a lista de produtos, não para a home */}
+         
             <Link
               href="/admin/produtos"
               className="flex items-center text-gray-500 hover:text-gray-800 mb-2 transition-colors"
@@ -46,7 +46,7 @@ export default async function ProductFormPage({ params }: Props) {
             action={saveProduct}
             className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4"
           >
-            {/* ID Oculto (se for edição) */}
+ 
             {!isNew && <input type="hidden" name="id" value={product?.id} />}
 
             {/* Nome */}
@@ -87,7 +87,7 @@ export default async function ProductFormPage({ params }: Props) {
                   name="price"
                   type="number"
                   step="0.01"
-                  // Conversão importante para garantir que o number venha certo
+                
                   defaultValue={product?.price ? Number(product.price) : ""}
                   required
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none transition-all"
