@@ -34,7 +34,7 @@ ${order.items.map((item) => `${item.quantity}x ${item.name}`).join("\n")}
 ${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/pedido/${order.id}`,
   );
 
-  const whatsappLink = `https://wa.me/5522988255351?text=${whatsappMessage}`;
+  const whatsappLink = `https://wa.me/5522981573795?text=${whatsappMessage}`;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">

@@ -1,132 +1,176 @@
 import { prisma } from "@/lib/prisma";
-import { updateOrderStatus, getStoreStatus } from "@/app/actions"; // <--- Adicionei getStoreStatus
 import { AdminNav } from "@/components/admin-nav";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { MessageCircle } from "lucide-react";
+import { Search, Calendar, Package, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { getStoreStatus /* clearAllOrders */ } from "@/app/actions";
+import { Prisma } from "@prisma/client";
 
-export default async function AdminOrders() {
-  // 1. Busca se a loja está aberta
+export const dynamic = "force-dynamic";
+
+// Tipagem correta para os parâmetros de busca
+interface PageProps {
+  searchParams: Promise<{
+    nome?: string;
+    data?: string;
+  }>;
+}
+
+export default async function AdminPedidos({ searchParams }: PageProps) {
   const isStoreOpen = await getStoreStatus();
+  const { nome, data } = await searchParams;
 
-  // 2. Busca os pedidos ordenados por CHEGADA (Antigos primeiro, novos por último)
-  const orders = await prisma.order.findMany({
+  // Construção do filtro com tipagem estrita do Prisma
+  const onde: Prisma.OrderWhereInput = {};
+
+  if (nome) {
+    onde.customerName = {
+      contains: nome,
+      mode: "insensitive",
+    };
+  }
+
+  if (data) {
+    const dataInicio = new Date(`${data}T00:00:00`);
+    const dataFim = new Date(`${data}T23:59:59`);
+    onde.createdAt = {
+      gte: dataInicio,
+      lte: dataFim,
+    };
+  }
+
+  const pedidos = await prisma.order.findMany({
+    where: onde,
     include: { items: true },
-    orderBy: { createdAt: "asc" }, // <--- Mudado para ASC
+    orderBy: { createdAt: "desc" },
   });
-
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Passamos o status para o menu mostrar o botão correto */}
       <AdminNav isStoreOpen={isStoreOpen} />
-
       <AutoRefresh />
 
-      <div className="p-6 max-w-4xl mx-auto pb-20">
-        <h2 className="text-2xl font-bold mb-6 font-display text-gray-800">
-          Fila de Pedidos
-        </h2>
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 font-display">
+            Gestão de Pedidos
+          </h2>
 
-        <div className="space-y-4">
-          {orders.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-400 text-lg">Tudo calmo por enquanto...</p>
-              <p className="text-sm text-gray-300">Nenhum pedido na fila.</p>
+          {/* Formulário simples para o botão de apagar tudo */}
+          {/*   <form
+            action={async () => {
+              "use server";
+              await clearAllOrders();
+            }}
+          >
+            <button
+              type="submit"
+              className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition-all uppercase"
+            >
+              <Trash2 size={14} /> Zerar Sistema
+            </button>
+          </form> */}
+        </div>
+
+        {/* --- FORMULÁRIO DE FILTRO --- */}
+        <form className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-xs font-bold text-gray-500 mb-1 block uppercase">
+              Nome do Cliente
+            </label>
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                name="nome"
+                defaultValue={nome}
+                placeholder="Buscar cliente..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sushi-red/20 outline-none text-black"
+              />
+            </div>
+          </div>
+
+          <div className="w-full sm:w-auto">
+            <label className="text-xs font-bold text-gray-500 mb-1 block uppercase">
+              Data
+            </label>
+            <div className="relative">
+              <Calendar
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+              <input
+                type="date"
+                name="data"
+                defaultValue={data}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sushi-red/20 outline-none text-black"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-sushi-red text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors"
+          >
+            Filtrar
+          </button>
+
+          <a
+            href="/admin/pedidos"
+            className="text-sm text-gray-500 hover:text-red-600 underline py-2"
+          >
+            Limpar
+          </a>
+        </form>
+
+        {/* --- LISTAGEM --- */}
+        <div className="grid gap-4">
+          {pedidos.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+              <Package className="mx-auto text-gray-300 mb-2" size={48} />
+              <p className="text-gray-500 font-medium">Nenhum pedido encontrado.</p>
             </div>
           ) : (
-            orders.map((order) => {
-              const cleanPhone = order.customerPhone.replace(/\D/g, "");
-              const message = encodeURIComponent(
-                `Olá ${order.customerName}! Recebemos seu pedido no Isa Sushi 🍣.\n\nAcompanhe o status e a entrega pelo link abaixo:\n${baseUrl}/pedido/${order.id}`,
-              );
-              const whatsappLink = `https://wa.me/55${cleanPhone}?text=${message}`;
-
-              return (
-                <div
-                  key={order.id}
-                  className="bg-white p-5 rounded-xl shadow-sm border border-gray-200"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-lg">{order.customerName}</h3>
-                        <span className="text-xs text-gray-400">
-                          #{order.id.slice(-4)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500">{order.customerPhone}</p>
-                      <p className="text-sm text-gray-600 mt-1 max-w-md">
-                        {order.address}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                        order.status === "PENDENTE"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : order.status === "PREPARANDO"
-                            ? "bg-blue-100 text-blue-700"
-                            : order.status === "ENTREGA"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {order.status}
+            pedidos.map((pedido) => (
+              <div
+                key={pedido.id}
+                className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-black"
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-sushi-red bg-red-50 px-2 py-0.5 rounded">
+                      #{pedido.id.slice(-4).toUpperCase()}
+                    </span>
+                    <span className="text-sm text-gray-400">
+                      {format(new Date(pedido.createdAt), "HH:mm '•' dd/MM/yyyy", {
+                        locale: ptBR,
+                      })}
                     </span>
                   </div>
-
-                  <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-1 mb-4 border border-gray-100">
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between">
-                        <span>
-                          <span className="font-bold">{item.quantity}x</span> {item.name}
-                        </span>
-                      </div>
-                    ))}
-                    <div className="border-t pt-2 mt-2 font-bold flex justify-between">
-                      <span>Total:</span>
-                      <span>R$ {order.total.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 border-t">
-                    <a
-                      href={whatsappLink}
-                      target="_blank"
-                      className="flex items-center gap-2 text-sm font-bold text-green-600 hover:bg-green-50 px-3 py-2 rounded-lg transition-colors border border-green-200 w-full sm:w-auto justify-center"
-                    >
-                      <MessageCircle size={18} /> Notificar Cliente
-                    </a>
-
-                    <form
-                      action={async (formData) => {
-                        "use server";
-                        const id = formData.get("id") as string;
-                        const status = formData.get("status") as string;
-                        await updateOrderStatus(id, status);
-                      }}
-                      className="flex gap-2 w-full sm:w-auto"
-                    >
-                      <input type="hidden" name="id" value={order.id} />
-                      <select
-                        name="status"
-                        defaultValue={order.status}
-                        className="border rounded-lg p-2 text-sm bg-gray-50 flex-1"
-                      >
-                        <option value="PENDENTE">Pendente</option>
-                        <option value="PREPARANDO">Preparando</option>
-                        <option value="ENTREGA">Saiu p/ Entrega</option>
-                        <option value="CONCLUIDO">Concluído</option>
-                      </select>
-                      <button className="bg-sushi-black hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                        Atualizar
-                      </button>
-                    </form>
-                  </div>
+                  <h3 className="font-bold text-lg text-gray-800">
+                    {pedido.customerName}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {pedido.items.length} itens • Total: R$ {pedido.total.toFixed(2)}
+                  </p>
                 </div>
-              );
-            })
+
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-700 uppercase">
+                    {pedido.status}
+                  </span>
+                  <a
+                    href={`/pedido/${pedido.id}`}
+                    className="text-sm font-bold text-sushi-red hover:underline"
+                  >
+                    Ver Detalhes
+                  </a>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

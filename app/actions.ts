@@ -54,7 +54,7 @@ export async function toggleStoreOpen() {
 
 export async function getStoreStatus() {
   const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
-  return settings ? settings.isOpen : true; // Padrão é aberta
+  return settings ? settings.isOpen : true;
 }
 
 // --- PEDIDOS ---
@@ -73,7 +73,7 @@ export async function createOrder(data: CreateOrderData) {
   // 1. VERIFICA SE A LOJA ESTÁ ABERTA ANTES DE SALVAR
   const isOpen = await getStoreStatus();
   if (!isOpen) {
-    throw new Error("LOJA_FECHADA"); // Vamos capturar esse erro no front
+    throw new Error("LOJA_FECHADA");
   }
 
   const order = await prisma.order.create({
@@ -109,3 +109,24 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
   revalidatePath(`/pedido/${orderId}`);
   revalidatePath("/admin/pedidos");
 }
+/* export async function clearAllOrders() {
+  try {
+    // Usamos uma transação para garantir que ambas as exclusões ocorram com sucesso
+    await prisma.$transaction([
+      // 1. Primeiro apagamos todos os itens dos pedidos
+      prisma.orderItem.deleteMany({}),
+      // 2. Depois apagamos os pedidos em si
+      prisma.order.deleteMany({}),
+    ]);
+
+    // Limpa o cache para atualizar a tela do admin imediatamente
+    revalidatePath("/admin/pedidos");
+    revalidatePath("/admin");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao zerar banco:", error);
+    throw new Error("Não foi possível excluir os pedidos.");
+  }
+}
+ */

@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Poppins, Josefin_Sans } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { WhatsAppButton } from "../components/whatsapp-button";
-const poppins = Poppins({
-  variable: "--font-poppins",
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
-const josefin = Josefin_Sans({
-  variable: "--font-josefin",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Isa Sushi - Cardápio",
-  description: "Delivery de comida japonesa",
+  title: "Isa Sushi",
+  description: "O melhor da culinária japonesa",
 };
 
 export default function RootLayout({
@@ -25,9 +24,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} ${josefin.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
-        <WhatsAppButton />
       </body>
     </html>
   );
