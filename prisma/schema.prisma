@@ -53,3 +53,9 @@ model OrderItem {
   quantity  Int
   price     Float
 }
+
+model StoreSettings {
+  id        String   @id @default("settings") // Vamos usar um ID fixo
+  isOpen    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}

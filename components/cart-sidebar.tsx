@@ -43,7 +43,7 @@ export function CartSidebar() {
   const handleFinishOrder = async () => {
     setLoading(true);
 
-    // --- VALIDAÇÃO DO TROCO (NOVA) ---
+    // --- VALIDAÇÃO DO TROCO ---
     if (paymentMethod === "Dinheiro") {
       const trocoValue = Number(changeFor);
       const totalValue = total();
@@ -60,7 +60,7 @@ export function CartSidebar() {
     try {
       const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood} ${address.complement ? `(${address.complement})` : ""}`;
 
-      // 1. Salva o pedido no banco
+      // 1. Tenta Salvar o pedido (Se a loja estiver fechada, vai dar erro aqui)
       const result = await createOrder({
         customerName: name,
         customerPhone: phone,
@@ -104,7 +104,16 @@ ${trackingLink}`;
       setName("");
       setChangeFor("");
     } catch (error) {
-      alert("Erro ao processar pedido. Tente novamente.");
+      // --- AQUI ESTÁ A ATUALIZAÇÃO PARA A LOJA FECHADA ---
+      const message = error instanceof Error ? error.message : "Erro desconhecido";
+      if (message.includes("LOJA_FECHADA")) {
+        alert(
+          "⛔ A LOJA ESTÁ FECHADA!\n\nNo momento não estamos aceitando novos pedidos. Tente novamente mais tarde.",
+        );
+      } else {
+        console.error("Erro ao processar pedido:", error);
+        alert("Erro ao processar pedido. Verifique os dados e tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
@@ -212,7 +221,7 @@ ${trackingLink}`;
                 )}
               </div>
 
-              {/* --- NOVO: TOTAL APARECENDO JÁ NA SACOLA --- */}
+              {/* TOTAL NA SACOLA */}
               {cart.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
                   <div className="flex justify-between items-center text-lg font-bold text-gray-800">
@@ -345,7 +354,6 @@ ${trackingLink}`;
                         placeholder={total().toFixed(2)}
                       />
                     </div>
-                    {/* Aviso de erro visual se o valor for baixo */}
                     {Number(changeFor) > 0 && Number(changeFor) < total() && (
                       <p className="text-xs text-red-500 mt-1 font-bold">
                         Valor menor que o total ({formattedTotal})
@@ -394,7 +402,6 @@ ${trackingLink}`;
             ) : (
               <button
                 onClick={handleFinishOrder}
-                // Desativa se o troco for inválido visualmente também
                 disabled={
                   loading ||
                   !name ||

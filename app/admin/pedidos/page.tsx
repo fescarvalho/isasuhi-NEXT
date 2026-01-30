@@ -1,21 +1,28 @@
 import { prisma } from "@/lib/prisma";
-import { updateOrderStatus } from "@/app/actions";
-import { AdminNav } from "@/components/admin-nav"; // <--- O IMPORT ESTÁ AQUI
+import { updateOrderStatus, getStoreStatus } from "@/app/actions"; // <--- Adicionei getStoreStatus
+import { AdminNav } from "@/components/admin-nav";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { MessageCircle } from "lucide-react";
 
 export default async function AdminOrders() {
+  // 1. Busca se a loja está aberta
+  const isStoreOpen = await getStoreStatus();
+
+  // 2. Busca os pedidos ordenados por CHEGADA (Antigos primeiro, novos por último)
   const orders = await prisma.order.findMany({
     include: { items: true },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" }, // <--- Mudado para ASC
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminNav /> {/* <--- O MENU APARECE AQUI */}
+      {/* Passamos o status para o menu mostrar o botão correto */}
+      <AdminNav isStoreOpen={isStoreOpen} />
+
       <AutoRefresh />
+
       <div className="p-6 max-w-4xl mx-auto pb-20">
         <h2 className="text-2xl font-bold mb-6 font-display text-gray-800">
           Fila de Pedidos

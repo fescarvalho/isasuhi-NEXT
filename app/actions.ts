@@ -4,9 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-// ==========================================
-// 1. GESTÃO DE PRODUTOS
-// ==========================================
+// --- GESTÃO DE PRODUTOS ---
 
 export async function saveProduct(formData: FormData) {
   const id = formData.get("id") as string;
@@ -26,24 +24,40 @@ export async function saveProduct(formData: FormData) {
       data: { name, description, price, categoryId, imageUrl },
     });
   }
-
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin");
+  revalidatePath("/admin/produtos");
+  redirect("/admin/produtos");
 }
 
 export async function deleteProduct(formData: FormData) {
   const id = formData.get("id") as string;
-
   await prisma.product.delete({ where: { id } });
+  revalidatePath("/");
+  revalidatePath("/admin/produtos");
+}
+
+// --- LOJA ABERTA / FECHADA ---
+
+export async function toggleStoreOpen() {
+  const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
+  const newState = settings ? !settings.isOpen : false; // Se não existir, fecha
+
+  await prisma.storeSettings.upsert({
+    where: { id: "settings" },
+    update: { isOpen: newState },
+    create: { id: "settings", isOpen: false }, // Começa fechada se criar agora
+  });
 
   revalidatePath("/");
   revalidatePath("/admin");
 }
 
-// ==========================================
-// 2. CHECKOUT (CRIAR PEDIDO)
-// ==========================================
+export async function getStoreStatus() {
+  const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
+  return settings ? settings.isOpen : true; // Padrão é aberta
+}
+
+// --- PEDIDOS ---
 
 interface CreateOrderData {
   customerName: string;
@@ -51,16 +65,17 @@ interface CreateOrderData {
   address: string;
   paymentMethod: string;
   changeFor?: string;
-  cart: {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-  }[];
+  cart: { id: string; name: string; price: number; quantity: number }[];
   total: number;
 }
 
 export async function createOrder(data: CreateOrderData) {
+  // 1. VERIFICA SE A LOJA ESTÁ ABERTA ANTES DE SALVAR
+  const isOpen = await getStoreStatus();
+  if (!isOpen) {
+    throw new Error("LOJA_FECHADA"); // Vamos capturar esse erro no front
+  }
+
   const order = await prisma.order.create({
     data: {
       customerName: data.customerName,
@@ -84,17 +99,13 @@ export async function createOrder(data: CreateOrderData) {
   return { orderId: order.id };
 }
 
-// ==========================================
-// 3. ATUALIZAR STATUS (Estava faltando essa!)
-// ==========================================
-
 export async function updateOrderStatus(orderId: string, newStatus: string) {
   await prisma.order.update({
     where: { id: orderId },
     data: { status: newStatus },
   });
 
-  // Atualiza tanto a página do cliente quanto a lista do admin
+  // Isso força a atualização tanto no admin quanto na página do cliente
   revalidatePath(`/pedido/${orderId}`);
   revalidatePath("/admin/pedidos");
 }
