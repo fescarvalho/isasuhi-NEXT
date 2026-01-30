@@ -36,7 +36,7 @@ export async function deleteProduct(formData: FormData) {
   revalidatePath("/admin/produtos");
 }
 
-
+// --- CONTROLE DA LOJA (MANUAL) ---
 
 export async function toggleStoreOpen() {
   const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
@@ -53,6 +53,8 @@ export async function toggleStoreOpen() {
 }
 
 export async function getStoreStatus() {
+  // Busca no banco de dados se a loja foi fechada manualmente.
+  // Se não tiver configuração (primeiro acesso), retorna TRUE (Aberta) para receber pedidos.
   const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
   return settings ? settings.isOpen : true;
 }
@@ -70,8 +72,9 @@ interface CreateOrderData {
 }
 
 export async function createOrder(data: CreateOrderData) {
- 
+  // Verifica se a dona fechou a loja manualmente
   const isOpen = await getStoreStatus();
+  
   if (!isOpen) {
     throw new Error("LOJA_FECHADA");
   }
@@ -105,21 +108,18 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
     data: { status: newStatus },
   });
 
-  // Isso força a atualização tanto no admin quanto na página do cliente
   revalidatePath(`/pedido/${orderId}`);
   revalidatePath("/admin/pedidos");
 }
-/* export async function clearAllOrders() {
+
+// --- ZERAR SISTEMA ---
+export async function clearAllOrders() {
   try {
-    // Usamos uma transação para garantir que ambas as exclusões ocorram com sucesso
     await prisma.$transaction([
-      // 1. Primeiro apagamos todos os itens dos pedidos
       prisma.orderItem.deleteMany({}),
-      // 2. Depois apagamos os pedidos em si
       prisma.order.deleteMany({}),
     ]);
 
-    // Limpa o cache para atualizar a tela do admin imediatamente
     revalidatePath("/admin/pedidos");
     revalidatePath("/admin");
 
@@ -129,4 +129,3 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
     throw new Error("Não foi possível excluir os pedidos.");
   }
 }
- */

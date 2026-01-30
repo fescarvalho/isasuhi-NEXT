@@ -3,7 +3,7 @@
 import { useCartStore } from "@/store/cart-store";
 import { Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image"; 
+import Image from "next/image"; // Otimização do Next.js
 
 interface ProductProps {
   product: {
@@ -16,20 +16,16 @@ interface ProductProps {
 }
 
 export function ProductCard({ product }: ProductProps) {
-  
-  const addToCart = useCartStore((state) => state.addToCart); 
+  const addToCart = useCartStore((state) => state.addToCart);
 
-  
   const handleAddToCart = () => {
-    
     addToCart({ 
       id: product.id, 
       name: product.name, 
       price: product.price, 
       description: product.description,
-    // imageUrl: product.imageUrl 
+      imageUrl: product.imageUrl // <--- Mantive ativo para aparecer no carrinho
     });
-
 
     toast.success(`${product.name} adicionado!`, {
       description: "Item salvo na sua sacola.",
@@ -38,7 +34,6 @@ export function ProductCard({ product }: ProductProps) {
       action: {
         label: "Ver Sacola",
         onClick: () => {
-          
           const cartTrigger = document.querySelector('[data-cart-trigger]') as HTMLElement;
           if (cartTrigger) cartTrigger.click();
         },
@@ -53,13 +48,17 @@ export function ProductCard({ product }: ProductProps) {
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
-  
+      
+      {/* Área da Imagem Otimizada (h-56 para dar destaque) */}
       <div className="h-56 w-full bg-gray-100 relative overflow-hidden">
         {product.imageUrl ? (
-          <img
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            fill // Faz a imagem preencher a div pai
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            // O segredo da performance: carrega imagens menores no celular
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">

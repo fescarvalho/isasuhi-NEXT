@@ -14,9 +14,13 @@ export function Header() {
         />
       </div>
       
-      <p className="text-gray-500 italic font-display text-sm">
+      <p className="text-gray-500 italic font-display text-1xl">
         O melhor da culinária japonesa oriental
       </p>
+
+      <div className="bg-yellow-100 text-yellow-800 text-xs mt-3 font-bold text-center py-2 px-4">
+       ⚠️ Aceitamos encomendas a semana toda! Entregas apenas na SEXTA-FEIRA.
+      </div>
     </header>
   );
 }
