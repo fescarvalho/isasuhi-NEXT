@@ -2,38 +2,88 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 // --- GESTÃO DE PRODUTOS ---
 
 export async function saveProduct(formData: FormData) {
-  const id = formData.get("id") as string;
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const categoryId = formData.get("categoryId") as string;
-  const imageUrl = formData.get("imageUrl") as string;
+  try {
+    const id = formData.get("id") as string;
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = parseFloat(formData.get("price") as string);
+    const categoryId = formData.get("categoryId") as string;
+    const imageUrl = formData.get("imageUrl") as string;
 
-  if (id) {
-    await prisma.product.update({
-      where: { id },
-      data: { name, description, price, categoryId, imageUrl },
-    });
-  } else {
-    await prisma.product.create({
-      data: { name, description, price, categoryId, imageUrl },
-    });
+    // Captura o checkbox (vem "on" do HTML ou "true" se enviado via JS)
+    const isFeatured =
+      formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true";
+
+    // Formata o nome da categoria para ficar Bonito (ex: "combos" -> "Combos")
+    const categoryName = categoryId
+      ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1)
+      : "Geral";
+
+    // Lógica inteligente: Conecta à categoria se existir, ou CRIA se não existir
+    const categoryConnection = {
+      connectOrCreate: {
+        where: { id: categoryId },
+        create: {
+          id: categoryId,
+          name: categoryName,
+        },
+      },
+    };
+
+    if (id) {
+      // ATUALIZAR
+      await prisma.product.update({
+        where: { id },
+        data: {
+          name,
+          description,
+          price,
+          imageUrl,
+          category: categoryConnection,
+          isFeatured, // ✅ Salva o destaque corretamente
+        },
+      });
+    } else {
+      // CRIAR
+      await prisma.product.create({
+        data: {
+          name,
+          description,
+          price,
+          imageUrl,
+          category: categoryConnection,
+          isFeatured, // ✅ Salva o destaque corretamente
+        },
+      });
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin/produtos");
+
+    // ✅ SUCESSO: Retorna objeto para o front fazer o redirect
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao salvar produto:", error);
+    // ❌ ERRO: Retorna objeto de erro
+    return { success: false, error: "Erro ao salvar no banco de dados." };
   }
-  revalidatePath("/");
-  revalidatePath("/admin/produtos");
-  redirect("/admin/produtos");
 }
 
 export async function deleteProduct(formData: FormData) {
   const id = formData.get("id") as string;
-  await prisma.product.delete({ where: { id } });
-  revalidatePath("/");
-  revalidatePath("/admin/produtos");
+  try {
+    await prisma.product.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/admin/produtos");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao deletar:", error);
+    return { success: false };
+  }
 }
 
 // --- CONTROLE DA LOJA (MANUAL) ---
@@ -45,7 +95,7 @@ export async function toggleStoreOpen() {
   await prisma.storeSettings.upsert({
     where: { id: "settings" },
     update: { isOpen: newState },
-    create: { id: "settings", isOpen: false }, 
+    create: { id: "settings", isOpen: false },
   });
 
   revalidatePath("/");
@@ -74,7 +124,7 @@ interface CreateOrderData {
 export async function createOrder(data: CreateOrderData) {
   // Verifica se a dona fechou a loja manualmente
   const isOpen = await getStoreStatus();
-  
+
   if (!isOpen) {
     throw new Error("LOJA_FECHADA");
   }

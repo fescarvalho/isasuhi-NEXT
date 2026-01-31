@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, Plus, Search } from "lucide-react";
-import { deleteProduct } from "@/app/actions";
+import Link from "next/link";
+import { Plus, Pencil, Search, Image as ImageIcon } from "lucide-react";
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  description: string;
+  imageUrl: string | null;
   categoryId: string;
-  category: { name: string };
+  isFeatured?: boolean; // Adicionei caso venha do banco
 }
 
 interface Category {
@@ -17,132 +19,116 @@ interface Category {
   name: string;
 }
 
-export function AdminProductsList({
-  products,
-  categories,
-}: {
+interface AdminProductsListProps {
   products: Product[];
   categories: Category[];
-}) {
-  const [activeCategory, setActiveCategory] = useState("TODOS");
+}
+
+export function AdminProductsList({ products, categories }: AdminProductsListProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      activeCategory === "TODOS" || product.categoryId === activeCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Filtra produtos pelo nome ou ID
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.id.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
-    <div>
-      {/* --- BARRA DE FERRAMENTAS --- */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-  
-        <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
-          <button
-            onClick={() => setActiveCategory("TODOS")}
-            className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
-              activeCategory === "TODOS"
-                ? "bg-sushi-black text-white"
-                : "bg-white text-gray-600 border hover:bg-gray-50"
-            }`}
-          >
-            Todos
-          </button>
-
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
-                activeCategory === cat.id
-                  ? "bg-sushi-black text-white"
-                  : "bg-white text-gray-600 border hover:bg-gray-50"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+    <div className="space-y-6">
+      {/* --- BARRA DE TOPO: BUSCA E BOTÃO NOVO --- */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou ID..."
+            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-sushi-red focus:border-transparent outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Botão Novo + Busca */}
-        <div className="flex gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Buscar produto..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sushi-red/20"
-            />
-          </div>
-          <button className="bg-sushi-red text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-sm whitespace-nowrap hover:bg-red-700 transition-colors">
-            <Plus size={18} /> <span className="hidden sm:inline">Novo</span>
-          </button>
-        </div>
+        <Link
+          href="/admin/produtos/novo"
+          className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-sm"
+        >
+          <Plus size={20} />
+          Novo Produto
+        </Link>
       </div>
 
       {/* --- LISTA DE PRODUTOS --- */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {filteredProducts.length === 0 ? (
-          <div className="p-10 text-center text-gray-400">
-            <p>Nenhum produto encontrado nesta categoria.</p>
-          </div>
-        ) : (
-          filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="p-4 border-b last:border-0 flex justify-between items-center hover:bg-gray-50 transition-colors group"
-            >
-              <div>
-                <p className="font-bold text-gray-800">{product.name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sushi-red font-bold text-sm">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(product.price)}
+      <div className="grid grid-cols-1 gap-4">
+        {filteredProducts.map((product) => (
+          <div
+            key={product.id}
+            className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-orange-200 hover:shadow-md transition-all group"
+          >
+            {/* 1. FOTO PEQUENA (Quadrada e fixa) */}
+            <div className="w-16 h-16 shrink-0 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center border border-gray-100">
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              ) : (
+                <ImageIcon className="text-gray-300" size={24} />
+              )}
+            </div>
+
+            {/* 2. CONTEÚDO (Com proteção min-w-0 para não estourar) */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-gray-800 text-base truncate pr-2">
+                  {product.name}
+                </h3>
+                {product.isFeatured && (
+                  <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">
+                    ★ Destaque
                   </span>
-                  <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded uppercase tracking-wide">
-                    {product.category.name}
-                  </span>
-                </div>
+                )}
               </div>
 
-              <div className="flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                {/* Botão Editar */}
-                <button
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  title="Editar"
-                >
-                  <Pencil size={18} />
-                </button>
+              <p className="text-xs text-gray-500 truncate mb-1">
+                {product.description || "Sem descrição"}
+              </p>
 
-                {/* Botão Deletar */}
-                <form action={deleteProduct}>
-                  <input type="hidden" name="id" value={product.id} />
-                  <button
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Excluir"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </form>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="font-bold text-sushi-red">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(product.price)}
+                </span>
+
+                {/* --- AQUI ESTÁ A CORREÇÃO DO LAYOUT NO MOBILE --- */}
+                <span className="text-[10px] text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded truncate max-w-[80px] md:max-w-xs font-mono">
+                  ID: {product.id}
+                </span>
               </div>
             </div>
-          ))
+
+            {/* 3. BOTÃO EDITAR */}
+            <Link
+              href={`/admin/produtos/${product.id}`}
+              className="p-3 bg-gray-50 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors shrink-0"
+            >
+              <Pencil size={20} />
+            </Link>
+          </div>
+        ))}
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+            <p className="text-gray-500">Nenhum produto encontrado.</p>
+          </div>
         )}
       </div>
-
-      <p className="text-xs text-gray-400 mt-4 text-center">
-        Mostrando {filteredProducts.length} de {products.length} produtos
-      </p>
     </div>
   );
 }

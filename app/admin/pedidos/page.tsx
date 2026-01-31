@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { AdminNav } from "@/components/admin-nav";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { Search, Calendar, Package, Trash2 } from "lucide-react";
+import { StatusDropdown } from "@/components/status-dropdown";
+import { Search, Calendar, Package, Trash2, Clock, User } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { getStoreStatus /* clearAllOrders */ } from "@/app/actions";
+import { getStoreStatus, clearAllOrders } from "@/app/actions";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -41,22 +42,21 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
   const pedidos = await prisma.order.findMany({
     where: onde,
     include: { items: true },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" }, // OS PRIMEIROS DO DIA EM CIMA
   });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminNav isStoreOpen={isStoreOpen} />
-      <AutoRefresh />
+      <AutoRefresh interval={15000} />
 
       <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 font-display">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-black text-gray-800 font-display uppercase tracking-tighter italic">
             Gestão de Pedidos
           </h2>
 
-          {/* Formulário simples para o botão de apagar tudo */}
-          {/*   <form
+          <form
             action={async () => {
               "use server";
               await clearAllOrders();
@@ -64,105 +64,109 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
           >
             <button
               type="submit"
-              className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition-all uppercase"
+              className="flex items-center gap-2 bg-red-50 text-red-600 border-2 border-red-100 px-4 py-2 rounded-xl text-xs font-black hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest shadow-sm"
             >
               <Trash2 size={14} /> Zerar Sistema
             </button>
-          </form> */}
+          </form>
         </div>
 
-        {/* --- FORMULÁRIO DE FILTRO --- */}
-        <form className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-[200px]">
-            <label className="text-xs font-bold text-gray-500 mb-1 block uppercase">
-              Nome do Cliente
+        {/* --- FILTROS --- */}
+        <form className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-8 flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[280px]">
+            <label className="text-[10px] font-black text-gray-400 mb-2 block uppercase tracking-widest ml-1">
+              Buscar Cliente
             </label>
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
                 size={18}
               />
               <input
                 name="nome"
                 defaultValue={nome}
-                placeholder="Buscar cliente..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sushi-red/20 outline-none text-black"
+                placeholder="Nome do cliente..."
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-sushi-red rounded-2xl outline-none text-black font-bold transition-all"
               />
             </div>
           </div>
 
           <div className="w-full sm:w-auto">
-            <label className="text-xs font-bold text-gray-500 mb-1 block uppercase">
+            <label className="text-[10px] font-black text-gray-400 mb-2 block uppercase tracking-widest ml-1">
               Data
             </label>
-            <div className="relative">
-              <Calendar
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="date"
-                name="data"
-                defaultValue={data}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sushi-red/20 outline-none text-black"
-              />
-            </div>
+            <input
+              type="date"
+              name="data"
+              defaultValue={data}
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent focus:border-sushi-red rounded-2xl outline-none text-black font-bold transition-all"
+            />
           </div>
 
           <button
             type="submit"
-            className="bg-sushi-red text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700 transition-colors"
+            className="bg-sushi-red text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-100"
           >
             Filtrar
           </button>
-
-          <a
-            href="/admin/pedidos"
-            className="text-sm text-gray-500 hover:text-red-600 underline py-2"
-          >
-            Limpar
-          </a>
         </form>
 
         {/* --- LISTAGEM --- */}
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {pedidos.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-              <Package className="mx-auto text-gray-300 mb-2" size={48} />
-              <p className="text-gray-500 font-medium">Nenhum pedido encontrado.</p>
+            <div className="text-center py-20 bg-white rounded-[32px] border-2 border-dashed border-gray-200">
+              <Package className="mx-auto text-gray-200 mb-4" size={64} />
+              <p className="text-gray-400 font-bold text-xl uppercase tracking-tighter">
+                Nenhum pedido na fila
+              </p>
             </div>
           ) : (
             pedidos.map((pedido) => (
               <div
                 key={pedido.id}
-                className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-black"
+                className="bg-white p-6 rounded-[32px] shadow-xl shadow-gray-200/50 border-2 border-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-black transition-all hover:scale-[1.01]"
               >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-sushi-red bg-red-50 px-2 py-0.5 rounded">
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black text-white bg-sushi-red px-3 py-1 rounded-full shadow-sm">
                       #{pedido.id.slice(-4).toUpperCase()}
                     </span>
-                    <span className="text-sm text-gray-400">
-                      {format(new Date(pedido.createdAt), "HH:mm '•' dd/MM/yyyy", {
+                    <div className="flex items-center gap-1.5 text-gray-500 font-black text-xs bg-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">
+                      <Clock size={14} className="text-sushi-red" />
+                      {format(new Date(pedido.createdAt), "HH:mm '•' dd/MM", {
                         locale: ptBR,
                       })}
-                    </span>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-lg text-gray-800">
+
+                  <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter italic flex items-center gap-2">
+                    <User size={24} className="text-gray-300" />
                     {pedido.customerName}
                   </h3>
-                  <p className="text-sm text-gray-500">
-                    {pedido.items.length} itens • Total: R$ {pedido.total.toFixed(2)}
-                  </p>
+
+                  <div className="flex flex-wrap gap-4 pt-1">
+                    <div className="flex items-center gap-1.5 text-gray-400 font-black uppercase text-[10px] tracking-[0.2em]">
+                      <Package size={14} />
+                      {pedido.items.length} PRODUTOS
+                    </div>
+                    <div className="text-sushi-red font-black text-2xl tracking-tighter">
+                      R$ {pedido.total.toFixed(2)}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-700 uppercase">
-                    {pedido.status}
-                  </span>
+                <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-4 border-t md:border-t-0 pt-5 md:pt-0">
+                  <div className="flex flex-col gap-1.5 w-full sm:w-56">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">
+                      Status do Pedido
+                    </label>
+                    <StatusDropdown orderId={pedido.id} currentStatus={pedido.status} />
+                  </div>
+
                   <a
                     href={`/pedido/${pedido.id}`}
-                    className="text-sm font-bold text-sushi-red hover:underline"
+                    target="_blank"
+                    className="w-full sm:w-auto bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all text-center shadow-lg active:scale-95"
                   >
                     Ver Detalhes
                   </a>

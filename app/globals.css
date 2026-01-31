@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@tailwind utilities;
+
+@import "@uploadthing/react/styles.css";
 @theme {
   /* Paleta de Cores Refinada */
   --color-sushi-red: #d32f2f;
@@ -7,9 +10,9 @@
   --color-sushi-black: #121212;
   --color-sushi-card: #ffffff;
   --color-sushi-accent: #ff4747; /* Vermelho mais vivo para botões */
-  --color-sushi-gold: #f59e0b;   /* Dourado para detalhes/estrelas */
-  --color-sushi-bg: #f9f9f7;     /* Fundo "Arroz" (Cream) */
-  
+  --color-sushi-gold: #f59e0b; /* Dourado para detalhes/estrelas */
+  --color-sushi-bg: #f9f9f7; /* Fundo "Arroz" (Cream) */
+
   /* Fontes */
   --font-sans: var(--font-poppins);
   --font-display: var(--font-josefin);
@@ -17,15 +20,26 @@
   /* Animações Personalizadas */
   --animate-float: float 3s ease-in-out infinite;
   --animate-fade-up: fadeUp 0.5s ease-out forwards;
-  
+
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
   }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 html {

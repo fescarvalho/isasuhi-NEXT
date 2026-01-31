@@ -38,7 +38,6 @@ export default async function AdminDashboard() {
     },
   });
 
-
   const formatMoney = (val: unknown) => {
     const numberValue = Number(val) || 0;
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
