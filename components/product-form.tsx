@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react"; // Removido o useEffect
+import { useState } from "react";
 import { saveProduct } from "@/app/actions";
 import { ImageUpload } from "@/components/image-upload";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Decimal } from "@prisma/client/runtime/library";
+// ❌ REMOVA O IMPORT DO DECIMAL AQUI
+
 interface Category {
   id: string;
   name: string;
@@ -16,24 +17,22 @@ interface Product {
   id: string;
   name: string;
   description: string | null;
-  price: number | Decimal;
+  price: number; // ✅ Mude de "number | Decimal" para APENAS "number"
   imageUrl: string | null;
   categoryId: string;
   isFeatured: boolean;
 }
 
 interface ProductFormProps {
-  product?: Product; // Em vez de any
-  categories: Category[]; // Em vez de any[]
+  product?: Product;
+  categories: Category[];
   isNew: boolean;
 }
 
 export function ProductForm({ product, categories, isNew }: ProductFormProps) {
-  // ✅ O estado é inicializado apenas uma vez aqui
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
   const router = useRouter();
 
-  // Função que lida com o envio do formulário sem retornar valor para o HTML
   async function handleAction(formData: FormData) {
     try {
       const result = await saveProduct(formData);
@@ -55,7 +54,7 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
 
   return (
     <form
-      action={handleAction} // ✅ Usa a função interna para evitar erros de tipo
+      action={handleAction}
       className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6"
     >
       {!isNew && <input type="hidden" name="id" value={product?.id} />}
@@ -92,8 +91,8 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
               name="price"
               type="number"
               step="0.01"
-              // ✅ Converte Decimal para Number com segurança
-              defaultValue={product?.price ? Number(product.price) : ""}
+              // ✅ Como agora é number puro, não precisa de conversão complexa
+              defaultValue={product?.price || ""}
               required
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red outline-none"
             />
@@ -121,6 +120,7 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
           </div>
         </div>
 
+        {/* ... Restante dos campos (Descrição, Checkbox) iguais ... */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Descrição
@@ -134,43 +134,26 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
         </div>
 
         <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100 transition-all hover:bg-orange-100/50">
-          <div className="relative flex items-center">
-            <input
-              type="checkbox"
-              id="isFeatured"
-              name="isFeatured"
-              defaultChecked={!!product?.isFeatured}
-              className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:border-orange-500 checked:bg-orange-500 focus:outline-none transition-all"
-            />
-            <svg
-              className="absolute h-3.5 w-3.5 pointer-events-none hidden peer-checked:block stroke-white mt-1 ml-0.5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </div>
-          <label
-            htmlFor="isFeatured"
-            className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-          >
-            🌟 Exibir em Os Mais Pedidos (Destaques)
+          <input
+            type="checkbox"
+            id="isFeatured"
+            name="isFeatured"
+            defaultChecked={!!product?.isFeatured}
+            className="w-5 h-5 accent-orange-500"
+          />
+          <label htmlFor="isFeatured" className="text-sm font-bold text-gray-700">
+            Exibir em Destaques
           </label>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition flex justify-center items-center gap-2"
-      >
-        <Save size={20} />
-        {isNew ? "Cadastrar Produto" : "Salvar Alterações"}
-      </button>
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition flex justify-center items-center gap-2"
+        >
+          <Save size={20} />
+          {isNew ? "Cadastrar Produto" : "Salvar Alterações"}
+        </button>
+      </div>
     </form>
   );
 }

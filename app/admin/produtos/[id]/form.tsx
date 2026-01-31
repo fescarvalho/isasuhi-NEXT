@@ -6,12 +6,27 @@ import { ImageUpload } from "@/components/image-upload";
 import { Save, Star } from "lucide-react"; // Adicionei o ícone Star para o destaque
 import { toast } from "sonner";
 
-interface ProductFormProps {
-  product?: any;
-  categories: any[];
-  isNew: boolean;
+interface Category {
+  id: string;
+  name: string;
 }
 
+// ✅ Definição exata do Produto (usando number para o preço)
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number; // No frontend, trabalhamos apenas com number
+  imageUrl: string | null;
+  categoryId: string;
+  isFeatured: boolean;
+}
+
+interface ProductFormProps {
+  product?: Product; // Propriedade opcional para o modo "Novo"
+  categories: Category[]; // Array de categorias tipado
+  isNew: boolean;
+}
 export function ProductForm({ product, categories, isNew }: ProductFormProps) {
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
 
@@ -67,7 +82,7 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
               name="price"
               type="number"
               step="0.01"
-              defaultValue={product?.price}
+              defaultValue={product?.price || ""}
               required
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red outline-none"
               placeholder="0.00"
@@ -102,7 +117,7 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
           </label>
           <textarea
             name="description"
-            defaultValue={product?.description}
+            defaultValue={product?.price || ""}
             rows={3}
             className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-sushi-red outline-none"
           />
