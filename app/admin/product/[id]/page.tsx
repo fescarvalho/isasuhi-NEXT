@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { saveProduct, getStoreStatus } from "@/app/actions";
+import { ProductForm } from "@/components/product-form"; // ✅ Usa o componente corrigido
+import { getStoreStatus } from "@/app/actions";
+import { AdminNav } from "@/components/admin-nav";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
-import { AdminNav } from "@/components/admin-nav"; // <--- Importe o menu
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -10,14 +12,31 @@ interface Props {
 
 export default async function ProductFormPage({ params }: Props) {
   const { id } = await params;
-
   const isStoreOpen = await getStoreStatus();
 
-  const isNew = id === "new";
+  // Verifica se é criação de novo produto
+  const isNew = id === "novo" || id === "new";
 
-  const product = !isNew ? await prisma.product.findUnique({ where: { id } }) : null;
+  // Busca dados (se não for novo)
+  const rawProduct = !isNew ? await prisma.product.findUnique({ where: { id } }) : null;
 
   const categories = await prisma.category.findMany({ orderBy: { order: "asc" } });
+
+  // Se tentou editar um ID que não existe, dá erro 404
+  if (!isNew && !rawProduct) {
+    return notFound();
+  }
+
+  // ✅ CONVERSÃO OBRIGATÓRIA (Decimal -> Number)
+  // Prepara o objeto para o componente Cliente
+  const product = rawProduct
+    ? {
+        ...rawProduct,
+        price: Number(rawProduct.price),
+        description: rawProduct.description || "",
+        imageUrl: rawProduct.imageUrl || null,
+      }
+    : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -37,101 +56,16 @@ export default async function ProductFormPage({ params }: Props) {
             </h1>
           </div>
 
-          <form
-            action={saveProduct}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4"
-          >
-            {!isNew && <input type="hidden" name="id" value={product?.id} />}
-
-            {/* Nome */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome do Produto
-              </label>
-              <input
-                name="name"
-                defaultValue={product?.name}
-                required
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none transition-all"
-                placeholder="Ex: Combo Família"
-              />
-            </div>
-
-            {/* Descrição */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descrição
-              </label>
-              <textarea
-                name="description"
-                defaultValue={product?.description || ""}
-                rows={3}
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none transition-all"
-                placeholder="Ex: 10 hots, 5 sashimis..."
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Preço */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preço (R$)
-                </label>
-                <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  defaultValue={product?.price ? Number(product.price) : ""}
-                  required
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none transition-all"
-                  placeholder="0.00"
-                />
-              </div>
-
-              {/* Categoria */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Categoria
-                </label>
-                <select
-                  name="categoryId"
-                  defaultValue={product?.categoryId}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none bg-white transition-all"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* URL da Imagem */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL da Imagem
-              </label>
-              <input
-                name="imageUrl"
-                defaultValue={product?.imageUrl || ""}
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red/20 focus:border-sushi-red outline-none transition-all"
-                placeholder="https://..."
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Cole um link de imagem ou deixe em branco.
-              </p>
-            </div>
-
-            {/* Botão Salvar */}
-            <button
-              type="submit"
-              className="w-full bg-green-600 text-white font-bold py-4 rounded-lg hover:bg-green-700 transition flex justify-center items-center gap-2 mt-4 shadow-lg shadow-green-100"
-            >
-              <Save size={20} />
-              {isNew ? "Cadastrar Produto" : "Salvar Alterações"}
-            </button>
-          </form>
+          {/* ✅ AQUI ESTÁ A CORREÇÃO:
+             Em vez de escrever <form> aqui, chamamos o componente <ProductForm />
+             que já tem a lógica de Toast e tratamento de erro correta.
+          */}
+          <ProductForm
+            key={product?.id || "new"}
+            product={product}
+            categories={categories}
+            isNew={isNew}
+          />
         </div>
       </div>
     </div>

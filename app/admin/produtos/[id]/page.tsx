@@ -14,18 +14,19 @@ export default async function EditProductPage({ params }: Props) {
 
   if (!rawProduct) return notFound();
 
-  // ✅ CONVERSÃO: Transforma Decimal em Number para o Frontend
+  // Conversão obrigatória de Decimal para Number
   const product = {
     ...rawProduct,
-    price: Number(rawProduct.price), // Converte o Decimal do Prisma para number
+    price: Number(rawProduct.price),
     description: rawProduct.description || "",
     imageUrl: rawProduct.imageUrl || null,
   };
 
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
+      <h1 className="text-2xl font-bold mb-6">Editar Produto</h1>
       <ProductForm
-        key={product.id} // Reinicia o estado do form ao mudar de produto
+        key={product.id}
         product={product}
         categories={categories}
         isNew={false}
