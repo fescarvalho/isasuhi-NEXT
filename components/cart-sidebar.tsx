@@ -2,16 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useCartStore } from "@/store/cart-store";
-import {
-  X,
-  ShoppingBag,
-  MapPin,
-  Banknote,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
+import { X, ShoppingBag, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { createOrder } from "@/app/actions";
+import Image from "next/image";
 
 export function CartSidebar() {
   const {
@@ -27,6 +20,7 @@ export function CartSidebar() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [changeFor, setChangeFor] = useState("");
+
   // Estados do Formulário
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -38,7 +32,7 @@ export function CartSidebar() {
   });
   const [paymentMethod, setPaymentMethod] = useState("PIX");
 
-  // Trava o scroll da página principal ao abrir o carrinho
+  // Trava a rolagem da página de trás
   useEffect(() => {
     if (isCartOpen) {
       document.body.style.overflow = "hidden";
@@ -58,7 +52,6 @@ export function CartSidebar() {
     try {
       const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood}${address.complement ? ` (${address.complement})` : ""}`;
 
-      // 1. Cria o pedido no banco e recebe o resultado (que contém o orderId)
       const result = await createOrder({
         customerName: name,
         customerPhone: phone,
@@ -69,17 +62,12 @@ export function CartSidebar() {
         total: total(),
       });
 
-      // 2. Monta as variáveis para a mensagem
       const storePhone = "5522981573795";
       const shortId = result.orderId.slice(-4);
-
-      // Captura a URL do seu site dinamicamente
       const siteUrl = window.location.origin;
       const trackingLink = `${siteUrl}/pedido/${result.orderId}`;
-
       const itemsList = cart.map((item) => `${item.quantity}x ${item.name}`).join("\n");
 
-      // 3. Monta a mensagem completa com o link de acompanhamento
       const message = `*NOVO PEDIDO REALIZADO* 🍣
 ID: #${shortId}
 
@@ -99,7 +87,6 @@ ${trackingLink}`;
 
       const whatsappUrl = `https://wa.me/${storePhone}?text=${encodeURIComponent(message)}`;
 
-      // 4. Abre o WhatsApp e limpa o carrinho
       window.open(whatsappUrl, "_blank");
       clearCart();
       toggleCart();
@@ -111,254 +98,242 @@ ${trackingLink}`;
       setLoading(false);
     }
   };
+
   const formattedTotal = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(total());
 
   return (
-    <div className="fixed inset-0 z-[999] flex justify-end overflow-hidden">
+    <div className="fixed inset-0 z-[999] flex justify-end">
+      {/* Overlay Escuro */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={toggleCart}
       />
 
-      <div className="relative w-full max-w-md bg-white h-screen flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden">
-        {/* HEADER FIXO */}
-        <div className="flex-none bg-sushi-red text-white">
-          <div className="flex justify-between items-center p-5 shadow-md relative">
-            <h2 className="font-extrabold text-xl font-display tracking-tight">
-              Seu Pedido
+      {/* Sidebar Container */}
+      {/* CORREÇÃO AQUI: h-[100dvh] garante altura correta no mobile sem esconder o botão */}
+      <div className="relative w-full h-[100dvh] md:w-[450px] md:h-screen bg-white flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 md:rounded-l-2xl">
+        {/* HEADER */}
+        <div className="flex-none bg-white text-gray-800 border-b border-gray-100 z-10">
+          <div className="flex justify-between items-center p-4 md:p-5">
+            <h2 className="font-bold text-lg text-gray-800">
+              {step === 1 ? "Sacola" : step === 2 ? "Entrega" : "Pagamento"}
             </h2>
             <button
               onClick={toggleCart}
-              className="hover:bg-white/20 p-2 rounded-full transition-colors"
+              className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-colors"
             >
               <X size={24} />
             </button>
           </div>
-          <div className="flex text-[11px] font-black bg-sushi-darkRed/20 uppercase tracking-widest">
+
+          {/* Barra de Progresso */}
+          <div className="flex px-5 pb-2 gap-2">
             <div
-              className={`flex-1 p-3 text-center flex flex-col items-center gap-1 ${step === 1 ? "bg-white text-sushi-red" : "opacity-70 text-white"}`}
-            >
-              <ShoppingBag size={16} /> Sacola
-            </div>
+              className={`h-1 flex-1 rounded-full transition-all ${step >= 1 ? "bg-sushi-red" : "bg-gray-100"}`}
+            />
             <div
-              className={`flex-1 p-3 text-center flex flex-col items-center gap-1 ${step === 2 ? "bg-white text-sushi-red" : "opacity-70 text-white"}`}
-            >
-              <MapPin size={16} /> Endereço
-            </div>
+              className={`h-1 flex-1 rounded-full transition-all ${step >= 2 ? "bg-sushi-red" : "bg-gray-100"}`}
+            />
             <div
-              className={`flex-1 p-3 text-center flex flex-col items-center gap-1 ${step === 3 ? "bg-white text-sushi-red" : "opacity-70 text-white"}`}
-            >
-              <Banknote size={16} /> Pagamento
-            </div>
+              className={`h-1 flex-1 rounded-full transition-all ${step >= 3 ? "bg-sushi-red" : "bg-gray-100"}`}
+            />
           </div>
         </div>
 
-        {/* CONTEÚDO ROLÁVEL (Onde fica o formulário) */}
-        <div className="flex-1 overflow-y-auto p-5 bg-gray-50 custom-scrollbar">
-          {/* PASSO 1: ITENS DA SACOLA */}
+        {/* CONTEÚDO ROLÁVEL (Meio da tela) */}
+        <div className="flex-1 overflow-y-auto bg-white custom-scrollbar pb-4">
+          {/* PASSO 1: LISTA */}
           {step === 1 && (
-            <div className="space-y-4 animate-in fade-in">
+            <div className="divide-y divide-gray-50">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-4 items-center"
+                  className="p-4 flex gap-3 md:gap-4 items-start hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex flex-col items-center justify-between bg-gray-50 rounded-lg border px-2 py-1 h-20">
-                    <button
-                      onClick={() => updateQuantity(item.id, "increase")}
-                      className="text-green-600 font-black text-xl"
-                    >
-                      +
-                    </button>
-                    <span className="text-sm font-black">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, "decrease")}
-                      className="text-red-600 font-black text-xl"
-                    >
-                      -
-                    </button>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-base text-gray-800 leading-tight mb-1">
-                      {item.name}
-                    </h4>
-                    <p className="font-black text-sushi-red text-base">
-                      {new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      }).format(item.price * item.quantity)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-gray-300 hover:text-red-500 p-1"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* PASSO 2: FORMULÁRIO DE CHECKOUT (RESTAURADO) */}
-          {step === 2 && (
-            <div className="space-y-6 animate-in fade-in flex flex-col">
-              {/* Bloco de Dados Pessoais */}
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                <div>
-                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                    Seu Nome Completo
-                  </label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all placeholder:font-medium"
-                    placeholder="Ex: João Silva"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                    WhatsApp para Contato
-                  </label>
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all placeholder:font-medium"
-                    placeholder="(22) 99999-9999"
-                  />
-                </div>
-              </div>
-
-              {/* Bloco de Endereço com Rua maior que o Número */}
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                <div className="col-span-3">
-                  {" "}
-                  {/* Rua ocupa 75% do espaço */}
-                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                    Rua
-                  </label>
-                  <input
-                    value={address.street}
-                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                    className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all"
-                    placeholder="Nome da rua"
-                  />
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="col-span-3">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                      Bairro
-                    </label>
-                    <input
-                      value={address.neighborhood}
-                      onChange={(e) =>
-                        setAddress({ ...address, neighborhood: e.target.value })
-                      }
-                      className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all"
-                      placeholder="Ex: Centro"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    {" "}
-                    {/* Número ocupa 25% do espaço */}
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block text-center">
-                      Nº
-                    </label>
-                    <input
-                      value={address.number}
-                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
-                      className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all text-center"
-                      placeholder="123"
-                    />
-                  </div>
-                </div>
-
-                <div></div>
-
-                <div>
-                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                    Complemento (Opcional)
-                  </label>
-                  <input
-                    value={address.complement}
-                    onChange={(e) =>
-                      setAddress({ ...address, complement: e.target.value })
-                    }
-                    className="w-full border-2 border-gray-100 p-4 rounded-xl text-lg font-bold outline-none focus:border-sushi-red transition-all font-medium"
-                    placeholder="Apto, Bloco, Referência..."
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PASSO 3: PAGAMENTO (Sendo renderizado dentro da div flex-1) */}
-          {step === 3 && (
-            <div className="space-y-6 animate-in fade-in">
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-black mb-5 flex items-center gap-2 text-gray-800">
-                  <Banknote size={24} className="text-green-600" /> Forma de Pagamento
-                </h3>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {["PIX", "Dinheiro", "Cartão"].map((method) => (
-                    <button
-                      key={method}
-                      onClick={() => setPaymentMethod(method)}
-                      className={`p-4 border-2 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${paymentMethod === method ? "bg-red-50 border-sushi-red text-sushi-red shadow-md" : "bg-gray-50 border-gray-100 text-gray-400"}`}
-                    >
-                      {method}
-                    </button>
-                  ))}
-                </div>
-
-                {/* CAMPO DE TROCO RESTAURADO */}
-                {paymentMethod === "Dinheiro" && (
-                  <div className="mt-6 animate-in slide-in-from-top-2 duration-300">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                      Troco para quanto?
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400 text-lg">
-                        R$
-                      </span>
-                      <input
-                        type="number"
-                        value={changeFor}
-                        onChange={(e) => setChangeFor(e.target.value)}
-                        className={`w-full border-2 p-4 pl-12 rounded-xl text-lg font-black outline-none transition-all ${Number(changeFor) > 0 && Number(changeFor) < total() ? "border-red-500 bg-red-50 text-red-600" : "border-gray-100 focus:border-sushi-red"}`}
-                        placeholder="0,00"
+                  {/* Foto Quadrada */}
+                  <div className="h-16 w-16 md:h-20 md:w-20 flex-shrink-0 rounded-lg bg-gray-100 relative overflow-hidden border border-gray-200">
+                    {item.imageUrl ? (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
                       />
-                    </div>
-                    {Number(changeFor) > 0 && Number(changeFor) < total() && (
-                      <p className="text-red-500 text-xs font-black mt-2 uppercase tracking-tighter">
-                        ⚠️ O valor deve ser maior que o total ({formattedTotal})
-                      </p>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-300">
+                        <ShoppingBag size={20} />
+                      </div>
                     )}
                   </div>
-                )}
+
+                  <div className="flex-1 flex flex-col justify-between min-h-[64px] md:min-h-[80px]">
+                    <div className="flex justify-between items-start gap-2">
+                      <h4 className="font-medium text-gray-800 text-sm leading-snug line-clamp-2">
+                        {item.name}
+                      </h4>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-gray-300 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-end justify-between mt-2">
+                      <span className="font-bold text-gray-900 text-sm md:text-base">
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(item.price)}
+                      </span>
+
+                      {/* Controlador de Quantidade */}
+                      <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm h-8 md:h-9">
+                        <button
+                          onClick={() => updateQuantity(item.id, "decrease")}
+                          className="px-2 md:px-3 text-red-600 font-bold hover:bg-red-50 h-full rounded-l-lg transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="text-sm font-semibold w-6 md:w-8 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, "increase")}
+                          className="px-2 md:px-3 text-red-600 font-bold hover:bg-red-50 h-full rounded-r-lg transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {cart.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                  <ShoppingBag size={48} className="mb-4 opacity-20" />
+                  <p>Sua sacola está vazia.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PASSO 2: DADOS */}
+          {step === 2 && (
+            <div className="p-5 space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide">
+                  Seus Dados
+                </h3>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-gray-400"
+                  placeholder="Seu Nome"
+                />
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-gray-400"
+                  placeholder="Seu WhatsApp"
+                />
               </div>
+
+              <div className="space-y-4 pt-4 border-t border-gray-100">
+                <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide">
+                  Endereço
+                </h3>
+                <input
+                  value={address.street}
+                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
+                  placeholder="Rua"
+                />
+                <div className="grid grid-cols-4 gap-3">
+                  <input
+                    value={address.neighborhood}
+                    onChange={(e) =>
+                      setAddress({ ...address, neighborhood: e.target.value })
+                    }
+                    className="col-span-3 w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
+                    placeholder="Bairro"
+                  />
+                  <input
+                    value={address.number}
+                    onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                    className="col-span-1 w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all text-center"
+                    placeholder="Nº"
+                  />
+                </div>
+                <input
+                  value={address.complement}
+                  onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
+                  placeholder="Complemento (Opcional)"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* PASSO 3: PAGAMENTO */}
+          {step === 3 && (
+            <div className="p-5 space-y-6">
+              <h3 className="font-bold text-gray-800">Como deseja pagar?</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {["PIX", "Dinheiro", "Cartão"].map((method) => (
+                  <button
+                    key={method}
+                    onClick={() => setPaymentMethod(method)}
+                    className={`p-4 border rounded-xl flex items-center justify-between transition-all ${paymentMethod === method ? "border-red-500 bg-red-50 text-red-700 font-bold shadow-sm" : "border-gray-200 hover:border-red-200 hover:bg-gray-50"}`}
+                  >
+                    <span>{method}</span>
+                    {paymentMethod === method && (
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {paymentMethod === "Dinheiro" && (
+                <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 animate-in fade-in">
+                  <label className="text-sm font-bold text-yellow-800 block mb-2">
+                    Troco para quanto?
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      R$
+                    </span>
+                    <input
+                      type="number"
+                      value={changeFor}
+                      onChange={(e) => setChangeFor(e.target.value)}
+                      className="w-full pl-10 p-3 border border-yellow-200 rounded-lg focus:border-yellow-500 outline-none bg-white"
+                      placeholder="0,00"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* FOOTER FIXO NA BASE */}
-        <div className="flex-none p-6 bg-white border-t shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-20">
-          <div className="flex justify-between items-center mb-6 px-1">
-            <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-              Total do Pedido:
-            </span>
-            <span className="text-2xl font-black text-sushi-red">{formattedTotal}</span>
+        {/* FOOTER FIXO (Rodapé) */}
+        {/* Usamos safe-area-bottom para garantir que não cole na borda do iPhone */}
+        <div className="flex-none p-5 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20 pb-[calc(20px+env(safe-area-inset-bottom))]">
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-gray-500 text-sm font-medium">Total do Pedido</span>
+            <span className="text-2xl font-black text-gray-900">{formattedTotal}</span>
           </div>
 
           <div className="flex gap-3">
             {step > 1 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="p-4 rounded-2xl border-2 border-gray-100 text-gray-400 hover:bg-gray-50 transition-colors"
+                className="px-4 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <ChevronLeft size={24} />
               </button>
@@ -367,18 +342,20 @@ ${trackingLink}`;
             <button
               disabled={cart.length === 0}
               onClick={step < 3 ? () => setStep(step + 1) : handleFinishOrder}
-              className={`flex-1 p-5 rounded-2xl font-black uppercase text-sm tracking-widest flex justify-center items-center gap-2 shadow-xl active:scale-95 transition-all ${
+              className={`flex-1 h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all ${
                 step === 3
-                  ? "bg-green-600 hover:bg-green-700 shadow-green-200"
-                  : "bg-sushi-red hover:bg-red-700 shadow-red-200"
-              } text-white`}
+                  ? "bg-green-600 text-white hover:bg-green-700 shadow-green-200"
+                  : "bg-sushi-red text-white hover:bg-red-700 shadow-red-200"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {loading ? (
                 <Loader2 className="animate-spin" />
               ) : (
                 <>
-                  {step < 3 ? "Continuar" : "Enviar Pedido no Zap"}
-                  <ChevronRight size={20} />
+                  {step === 1 && "Continuar"}
+                  {step === 2 && "Ir para Pagamento"}
+                  {step === 3 && "Finalizar Pedido"}
+                  {step < 3 && <ChevronRight size={20} />}
                 </>
               )}
             </button>
