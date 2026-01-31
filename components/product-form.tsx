@@ -1,43 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react"; // Removido o useEffect
 import { saveProduct } from "@/app/actions";
 import { ImageUpload } from "@/components/image-upload";
-import { Save, Star } from "lucide-react";
+import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Decimal } from "@prisma/client/runtime/library";
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | Decimal;
+  imageUrl: string | null;
+  categoryId: string;
+  isFeatured: boolean;
+}
 
 interface ProductFormProps {
-  product?: any;
-  categories: any[];
+  product?: Product; // Em vez de any
+  categories: Category[]; // Em vez de any[]
   isNew: boolean;
 }
 
 export function ProductForm({ product, categories, isNew }: ProductFormProps) {
+  // ✅ O estado é inicializado apenas uma vez aqui
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
   const router = useRouter();
 
-  useEffect(() => {
-    if (product?.imageUrl) {
-      setImageUrl(product.imageUrl);
-    }
-  }, [product]);
-
-  // ✅ CORREÇÃO AQUI: A função é async void (não retorna nada)
+  // Função que lida com o envio do formulário sem retornar valor para o HTML
   async function handleAction(formData: FormData) {
     try {
-      // 1. Chamamos a action e guardamos o resultado numa variável
-      // ⚠️ IMPORTANTE: NÃO coloque "return" antes do await
       const result = await saveProduct(formData);
 
-      // 2. Verificamos o resultado
       if (result?.success) {
         toast.success(isNew ? "Produto criado!" : "Produto atualizado!");
-
-        // 3. Redirecionamento suave
         setTimeout(() => {
           router.push("/admin/produtos");
-          router.refresh(); // Garante que a lista atualize
+          router.refresh();
         }, 1000);
       } else {
         toast.error("Houve um problema ao salvar.");
@@ -46,18 +51,15 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
       console.error(error);
       toast.error("Erro crítico no sistema.");
     }
-    // O final da função não tem return, então ela retorna Promise<void> implicitamente,
-    // o que satisfaz o TypeScript do formulário.
   }
 
   return (
     <form
-      action={handleAction}
+      action={handleAction} // ✅ Usa a função interna para evitar erros de tipo
       className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6"
     >
       {!isNew && <input type="hidden" name="id" value={product?.id} />}
 
-      {/* --- UPLOAD DE IMAGEM --- */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2">
           Foto do Prato
@@ -70,7 +72,6 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
         <input type="hidden" name="imageUrl" value={imageUrl} />
       </div>
 
-      {/* Campos de Texto */}
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -79,7 +80,6 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
             defaultValue={product?.name || ""}
             required
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red outline-none"
-            placeholder="Ex: Combo Família"
           />
         </div>
 
@@ -92,10 +92,10 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
               name="price"
               type="number"
               step="0.01"
+              // ✅ Converte Decimal para Number com segurança
               defaultValue={product?.price ? Number(product.price) : ""}
               required
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-sushi-red outline-none"
-              placeholder="0.00"
             />
           </div>
 
@@ -133,7 +133,6 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
           />
         </div>
 
-        {/* --- CAMPO DE DESTAQUE --- */}
         <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100 transition-all hover:bg-orange-100/50">
           <div className="relative flex items-center">
             <input
