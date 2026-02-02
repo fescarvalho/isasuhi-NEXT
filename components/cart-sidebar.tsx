@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useCartStore } from "@/store/cart-store";
-import { X, ShoppingBag, Trash2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  X,
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Copy,
+  CheckCircle2,
+} from "lucide-react";
 import { createOrder } from "@/app/actions";
 import Image from "next/image";
 
@@ -11,7 +19,7 @@ export function CartSidebar() {
     cart,
     isCartOpen,
     toggleCart,
-    removeFromCart,
+
     updateQuantity,
     total,
     clearCart,
@@ -46,6 +54,11 @@ export function CartSidebar() {
 
   if (!isCartOpen) return null;
 
+  const formattedTotal = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(total());
+
   const handleFinishOrder = async () => {
     setLoading(true);
 
@@ -63,7 +76,7 @@ export function CartSidebar() {
       });
 
       const storePhone = "5522981573795";
-      const shortId = result.orderId.slice(-4);
+      const shortId = result.orderId.slice(-4).toUpperCase();
       const siteUrl = window.location.origin;
       const trackingLink = `${siteUrl}/pedido/${result.orderId}`;
       const itemsList = cart.map((item) => `${item.quantity}x ${item.name}`).join("\n");
@@ -87,7 +100,9 @@ ${trackingLink}`;
 
       const whatsappUrl = `https://wa.me/${storePhone}?text=${encodeURIComponent(message)}`;
 
-      window.open(whatsappUrl, "_blank");
+      // SOLUÇÃO PARA IPHONE: Redirecionamento na mesma aba evita bloqueio de pop-up
+      window.location.href = whatsappUrl;
+
       clearCart();
       toggleCart();
       setStep(1);
@@ -99,62 +114,57 @@ ${trackingLink}`;
     }
   };
 
-  const formattedTotal = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(total());
+  const copyPix = () => {
+    navigator.clipboard.writeText("SUA_CHAVE_PIX_AQUI");
+    alert("Chave Pix Copiada!");
+  };
 
   return (
     <div className="fixed inset-0 z-[999] flex justify-end">
-      {/* Overlay Escuro */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={toggleCart}
       />
 
-      {/* Sidebar Container */}
-      {/* CORREÇÃO AQUI: h-[100dvh] garante altura correta no mobile sem esconder o botão */}
-      <div className="relative w-full h-[100dvh] md:w-[450px] md:h-screen bg-white flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 md:rounded-l-2xl">
+      <div className="relative w-full h-[100dvh] md:w-[450px] bg-white flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden">
         {/* HEADER */}
         <div className="flex-none bg-white text-gray-800 border-b border-gray-100 z-10">
-          <div className="flex justify-between items-center p-4 md:p-5">
-            <h2 className="font-bold text-lg text-gray-800">
-              {step === 1 ? "Sacola" : step === 2 ? "Entrega" : "Pagamento"}
+          <div className="flex justify-between items-center p-5">
+            <h2 className="font-black text-2xl uppercase italic tracking-tighter text-sushi-red">
+              {step === 1 ? "Sua Sacola" : step === 2 ? "Entrega" : "Pagamento"}
             </h2>
             <button
               onClick={toggleCart}
               className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-colors"
             >
-              <X size={24} />
+              <X size={28} strokeWidth={3} />
             </button>
           </div>
 
-          {/* Barra de Progresso */}
-          <div className="flex px-5 pb-2 gap-2">
+          <div className="flex px-5 pb-4 gap-2">
             <div
-              className={`h-1 flex-1 rounded-full transition-all ${step >= 1 ? "bg-sushi-red" : "bg-gray-100"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 1 ? "bg-sushi-red" : "bg-gray-100"}`}
             />
             <div
-              className={`h-1 flex-1 rounded-full transition-all ${step >= 2 ? "bg-sushi-red" : "bg-gray-100"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 2 ? "bg-sushi-red" : "bg-gray-100"}`}
             />
             <div
-              className={`h-1 flex-1 rounded-full transition-all ${step >= 3 ? "bg-sushi-red" : "bg-gray-100"}`}
+              className={`h-1.5 flex-1 rounded-full ${step >= 3 ? "bg-sushi-red" : "bg-gray-100"}`}
             />
           </div>
         </div>
 
-        {/* CONTEÚDO ROLÁVEL (Meio da tela) */}
-        <div className="flex-1 overflow-y-auto bg-white custom-scrollbar pb-4">
+        {/* CONTEÚDO ROLÁVEL */}
+        <div className="flex-1 overflow-y-auto bg-white p-5 custom-scrollbar">
           {/* PASSO 1: LISTA */}
           {step === 1 && (
-            <div className="divide-y divide-gray-50">
+            <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="p-4 flex gap-3 md:gap-4 items-start hover:bg-gray-50 transition-colors"
+                  className="flex gap-4 items-center bg-gray-50/50 p-3 rounded-2xl border border-gray-100"
                 >
-                  {/* Foto Quadrada */}
-                  <div className="h-16 w-16 md:h-20 md:w-20 flex-shrink-0 rounded-lg bg-gray-100 relative overflow-hidden border border-gray-200">
+                  <div className="h-20 w-20 flex-shrink-0 rounded-xl relative overflow-hidden border border-gray-200">
                     {item.imageUrl ? (
                       <Image
                         src={item.imageUrl}
@@ -163,199 +173,217 @@ ${trackingLink}`;
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-300">
-                        <ShoppingBag size={20} />
+                      <div className="flex items-center justify-center h-full bg-gray-100 text-gray-300">
+                        <ShoppingBag />
                       </div>
                     )}
                   </div>
-
-                  <div className="flex-1 flex flex-col justify-between min-h-[64px] md:min-h-[80px]">
-                    <div className="flex justify-between items-start gap-2">
-                      <h4 className="font-medium text-gray-800 text-sm leading-snug line-clamp-2">
-                        {item.name}
-                      </h4>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-gray-300 hover:text-red-500 transition-colors p-1 -mt-1 -mr-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-end justify-between mt-2">
-                      <span className="font-bold text-gray-900 text-sm md:text-base">
-                        {new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        }).format(item.price)}
-                      </span>
-
-                      {/* Controlador de Quantidade */}
-                      <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm h-8 md:h-9">
-                        <button
-                          onClick={() => updateQuantity(item.id, "decrease")}
-                          className="px-2 md:px-3 text-red-600 font-bold hover:bg-red-50 h-full rounded-l-lg transition-colors"
-                        >
-                          -
-                        </button>
-                        <span className="text-sm font-semibold w-6 md:w-8 text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.id, "increase")}
-                          className="px-2 md:px-3 text-red-600 font-bold hover:bg-red-50 h-full rounded-r-lg transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex-1">
+                    <h4 className="font-black text-gray-800 text-base leading-tight line-clamp-2 uppercase">
+                      {item.name}
+                    </h4>
+                    <p className="font-black text-sushi-red text-lg mt-1">
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(item.price)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      onClick={() => updateQuantity(item.id, "increase")}
+                      className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-green-600 shadow-sm"
+                    >
+                      +
+                    </button>
+                    <span className="font-black text-sm">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.id, "decrease")}
+                      className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-red-600 shadow-sm"
+                    >
+                      -
+                    </button>
                   </div>
                 </div>
               ))}
-
-              {cart.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                  <ShoppingBag size={48} className="mb-4 opacity-20" />
-                  <p>Sua sacola está vazia.</p>
-                </div>
-              )}
             </div>
           )}
 
-          {/* PASSO 2: DADOS */}
+          {/* PASSO 2: ENDEREÇO (RUA MAIOR QUE BAIRRO) */}
           {step === 2 && (
-            <div className="p-5 space-y-6">
+            <div className="space-y-6 animate-in fade-in">
               <div className="space-y-4">
-                <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
                   Seus Dados
-                </h3>
+                </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-gray-400"
-                  placeholder="Seu Nome"
+                  className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
+                  placeholder="NOME COMPLETO"
                 />
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder:text-gray-400"
-                  placeholder="Seu WhatsApp"
+                  className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
+                  placeholder="WHATSAPP"
                 />
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-gray-100">
-                <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide">
-                  Endereço
-                </h3>
-                <input
-                  value={address.street}
-                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
-                  placeholder="Rua"
-                />
-                <div className="grid grid-cols-4 gap-3">
-                  <input
-                    value={address.neighborhood}
-                    onChange={(e) =>
-                      setAddress({ ...address, neighborhood: e.target.value })
-                    }
-                    className="col-span-3 w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
-                    placeholder="Bairro"
-                  />
-                  <input
-                    value={address.number}
-                    onChange={(e) => setAddress({ ...address, number: e.target.value })}
-                    className="col-span-1 w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all text-center"
-                    placeholder="Nº"
-                  />
+              <div className="space-y-4 border-t pt-6">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                  Onde Entregar
+                </label>
+                <div className="grid grid-cols-6 gap-3">
+                  <div className="col-span-4">
+                    <input
+                      value={address.street}
+                      onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                      className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
+                      placeholder="RUA"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <input
+                      value={address.number}
+                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                      className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red text-center"
+                      placeholder="Nº"
+                    />
+                  </div>
                 </div>
+
+                <input
+                  value={address.neighborhood}
+                  onChange={(e) =>
+                    setAddress({ ...address, neighborhood: e.target.value })
+                  }
+                  className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
+                  placeholder="BAIRRO"
+                />
+
                 <input
                   value={address.complement}
                   onChange={(e) => setAddress({ ...address, complement: e.target.value })}
-                  className="w-full border border-gray-200 p-3 rounded-lg outline-none focus:border-red-500 transition-all"
-                  placeholder="Complemento (Opcional)"
+                  className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
+                  placeholder="COMPLEMENTO (OPCIONAL)"
                 />
               </div>
             </div>
           )}
 
-          {/* PASSO 3: PAGAMENTO */}
+          {/* PASSO 3: PAGAMENTO (PIX COM QR CODE) */}
           {step === 3 && (
-            <div className="p-5 space-y-6">
-              <h3 className="font-bold text-gray-800">Como deseja pagar?</h3>
+            <div className="space-y-6 animate-in fade-in">
               <div className="grid grid-cols-1 gap-3">
                 {["PIX", "Dinheiro", "Cartão"].map((method) => (
                   <button
                     key={method}
                     onClick={() => setPaymentMethod(method)}
-                    className={`p-4 border rounded-xl flex items-center justify-between transition-all ${paymentMethod === method ? "border-red-500 bg-red-50 text-red-700 font-bold shadow-sm" : "border-gray-200 hover:border-red-200 hover:bg-gray-50"}`}
+                    className={`p-5 border-2 rounded-2xl flex items-center justify-between transition-all ${paymentMethod === method ? "border-sushi-red bg-red-50 text-sushi-red font-black" : "border-gray-100 text-gray-400 font-bold"}`}
                   >
-                    <span>{method}</span>
-                    {paymentMethod === method && (
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
-                    )}
+                    <span className="uppercase tracking-widest">{method}</span>
+                    {paymentMethod === method && <CheckCircle2 size={20} />}
                   </button>
                 ))}
               </div>
 
+              {paymentMethod === "PIX" && (
+                <div className="bg-gray-50 p-8 rounded-[32px] border-2 border-dashed border-gray-200 text-center animate-in zoom-in-95 duration-300">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
+                    Copie a chave Pix abaixo:
+                  </p>
+
+                  <div className="bg-white border-2 border-gray-200 p-5 rounded-2xl flex flex-col gap-4 shadow-sm">
+                    <span className="text-lg font-black text-gray-800 break-all leading-tight">
+                      15175144790
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText("15175144790");
+                        alert("✅ Chave Pix Copiada!");
+                      }}
+                      className="w-full bg-gray-900 text-white p-4 rounded-xl flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 shadow-lg"
+                    >
+                      <span className="font-black text-xs uppercase tracking-widest">
+                        Copiar Chave
+                      </span>
+                      <Copy size={20} strokeWidth={3} />
+                    </button>
+                  </div>
+
+                  <p className="text-[10px] text-red-500 font-black mt-6 uppercase tracking-tighter italic leading-relaxed">
+                    ⚠️ O seu pedido só será iniciado após
+                    <br />o envio do comprovante no WhatsApp
+                  </p>
+                </div>
+              )}
+
               {paymentMethod === "Dinheiro" && (
-                <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-100 animate-in fade-in">
-                  <label className="text-sm font-bold text-yellow-800 block mb-2">
+                <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100">
+                  <label className="text-[10px] font-black text-yellow-800 uppercase block mb-2 tracking-widest">
                     Troco para quanto?
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      R$
-                    </span>
-                    <input
-                      type="number"
-                      value={changeFor}
-                      onChange={(e) => setChangeFor(e.target.value)}
-                      className="w-full pl-10 p-3 border border-yellow-200 rounded-lg focus:border-yellow-500 outline-none bg-white"
-                      placeholder="0,00"
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    value={changeFor}
+                    onChange={(e) => setChangeFor(e.target.value)}
+                    className="w-full p-4 border-2 border-yellow-200 rounded-xl font-black text-lg outline-none focus:border-yellow-500"
+                    placeholder="R$ 0,00"
+                  />
+                  {Number(changeFor) > 0 && Number(changeFor) < total() && (
+                    <p className="text-red-500 text-[10px] font-black mt-2 uppercase">
+                      ⚠️ Valor menor que o total
+                    </p>
+                  )}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* FOOTER FIXO (Rodapé) */}
-        {/* Usamos safe-area-bottom para garantir que não cole na borda do iPhone */}
-        <div className="flex-none p-5 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20 pb-[calc(20px+env(safe-area-inset-bottom))]">
-          <div className="flex justify-between items-end mb-4">
-            <span className="text-gray-500 text-sm font-medium">Total do Pedido</span>
-            <span className="text-2xl font-black text-gray-900">{formattedTotal}</span>
+        {/* FOOTER FIXO */}
+        <div className="flex-none p-6 bg-white border-t border-gray-100 shadow-[0_-10px_25px_rgba(0,0,0,0.05)] pb-[calc(20px+env(safe-area-inset-bottom))]">
+          <div className="flex justify-between items-end mb-6 px-1">
+            <span className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
+              Total do Pedido
+            </span>
+            <span className="text-3xl font-black text-gray-900 tracking-tighter">
+              {formattedTotal}
+            </span>
           </div>
 
           <div className="flex gap-3">
             {step > 1 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="px-4 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors"
+                className="px-5 rounded-2xl border-2 border-gray-100 text-gray-400 hover:bg-gray-50"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={28} strokeWidth={3} />
               </button>
             )}
 
             <button
-              disabled={cart.length === 0}
+              disabled={
+                loading ||
+                cart.length === 0 ||
+                (paymentMethod === "Dinheiro" && Number(changeFor) < total())
+              }
               onClick={step < 3 ? () => setStep(step + 1) : handleFinishOrder}
-              className={`flex-1 h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all ${
-                step === 3
-                  ? "bg-green-600 text-white hover:bg-green-700 shadow-green-200"
-                  : "bg-sushi-red text-white hover:bg-red-700 shadow-red-200"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${
+                step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
+              } disabled:opacity-50`}
             >
               {loading ? (
                 <Loader2 className="animate-spin" />
               ) : (
                 <>
                   {step === 1 && "Continuar"}
-                  {step === 2 && "Ir para Pagamento"}
-                  {step === 3 && "Finalizar Pedido"}
-                  {step < 3 && <ChevronRight size={20} />}
+                  {step === 2 && "Pagamento"}
+                  {step === 3 && "Finalizar no Zap"}
+                  {step < 3 && <ChevronRight size={20} strokeWidth={3} />}
                 </>
               )}
             </button>
