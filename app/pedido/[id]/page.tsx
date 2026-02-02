@@ -93,7 +93,7 @@ export default async function OrderTrackingPage({ params }: Props) {
                     Saiu para Entrega
                   </p>
                   <p className="text-sm font-bold text-gray-400 uppercase mt-2">
-                    O motoboy já iniciou o percurso
+                    Seu pedido ja esta a caminho!!
                   </p>
                 </div>
               </div>
