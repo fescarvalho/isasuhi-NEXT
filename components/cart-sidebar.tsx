@@ -115,7 +115,7 @@ ${trackingLink}`;
   };
 
   const copyPix = () => {
-    navigator.clipboard.writeText("SUA_CHAVE_PIX_AQUI");
+    navigator.clipboard.writeText("22998184401");
     alert("Chave Pix Copiada!");
   };
 
@@ -296,13 +296,13 @@ ${trackingLink}`;
 
                   <div className="bg-white border-2 border-gray-200 p-5 rounded-2xl flex flex-col gap-4 shadow-sm">
                     <span className="text-lg font-black text-gray-800 break-all leading-tight">
-                      15175144790
+                      22998184401
                     </span>
 
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText("15175144790");
+                        navigator.clipboard.writeText("22998184401");
                         alert("✅ Chave Pix Copiada!");
                       }}
                       className="w-full bg-gray-900 text-white p-4 rounded-xl flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 shadow-lg"

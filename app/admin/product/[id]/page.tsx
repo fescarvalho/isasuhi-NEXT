@@ -10,6 +10,8 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductFormPage({ params }: Props) {
   const { id } = await params;
   const isStoreOpen = await getStoreStatus();
@@ -31,11 +33,11 @@ export default async function ProductFormPage({ params }: Props) {
   // Prepara o objeto para o componente Cliente
   const product = rawProduct
     ? {
-        ...rawProduct,
-        price: Number(rawProduct.price),
-        description: rawProduct.description || "",
-        imageUrl: rawProduct.imageUrl || null,
-      }
+      ...rawProduct,
+      price: Number(rawProduct.price),
+      description: rawProduct.description || "",
+      imageUrl: rawProduct.imageUrl || null,
+    }
     : undefined;
 
   return (

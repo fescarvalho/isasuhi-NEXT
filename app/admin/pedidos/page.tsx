@@ -40,7 +40,7 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
   // Buscamos dataInicio e dataFim da URL
   const { nome, dataInicio, dataFim } = await searchParams;
 
-  const onde: Prisma.OrderWhereInput = {};
+  const onde: any = {};
 
   if (nome) {
     onde.customerName = {
@@ -183,7 +183,7 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
               </p>
             </div>
           ) : (
-            pedidos.map((pedido) => (
+            pedidos.map((pedido: any) => (
               <div
                 key={pedido.id}
                 className="bg-white rounded-[32px] shadow-xl shadow-gray-200/50 border-2 border-gray-100 overflow-hidden flex flex-col text-black transition-all hover:border-gray-200"

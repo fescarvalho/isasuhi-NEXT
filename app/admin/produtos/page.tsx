@@ -3,6 +3,8 @@ import { AdminProductsList } from "@/components/admin-products-list";
 import { AdminNav } from "@/components/admin-nav";
 import { getStoreStatus } from "@/app/actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminProductsPage() {
   // 1. Busca os Produtos
   const rawProducts = await prisma.product.findMany({
@@ -10,7 +12,7 @@ export default async function AdminProductsPage() {
   });
 
   // Converte o preço Decimal -> Number
-  const products = rawProducts.map((product) => ({
+  const products = rawProducts.map((product: any) => ({
     ...product,
     price: product.price.toNumber(),
     description: product.description || "",

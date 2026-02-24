@@ -2,11 +2,37 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+
+// --- MIDDLEWARE/AUTH HELPER ---
+async function verifyAdmin() {
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization");
+
+  const validUser = process.env.LOGIN;
+  const validPass = process.env.SENHA;
+
+  if (!validUser || !validPass) {
+    throw new Error("Credenciais do servidor não configuradas.");
+  }
+
+  if (!authHeader) {
+    throw new Error("Não autorizado");
+  }
+
+  const authValue = authHeader.split(" ")[1];
+  const [user, pwd] = atob(authValue).split(":");
+
+  if (user !== validUser || pwd !== validPass) {
+    throw new Error("Não autorizado");
+  }
+}
 
 // --- GESTÃO DE PRODUTOS ---
 
 export async function saveProduct(formData: FormData) {
   try {
+    await verifyAdmin();
     const id = formData.get("id") as string;
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -74,8 +100,9 @@ export async function saveProduct(formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData) {
-  const id = formData.get("id") as string;
   try {
+    await verifyAdmin();
+    const id = formData.get("id") as string;
     await prisma.product.delete({ where: { id } });
     revalidatePath("/");
     revalidatePath("/admin/produtos");
@@ -89,6 +116,7 @@ export async function deleteProduct(formData: FormData) {
 // --- CONTROLE DA LOJA (MANUAL) ---
 
 export async function toggleStoreOpen() {
+  await verifyAdmin();
   const settings = await prisma.storeSettings.findUnique({ where: { id: "settings" } });
   const newState = settings ? !settings.isOpen : false;
 
@@ -129,6 +157,31 @@ export async function createOrder(data: CreateOrderData) {
     throw new Error("LOJA_FECHADA");
   }
 
+  // --- RECÁLCULO SEGURO DO PREÇO NO BACKEND ---
+  let realTotal = 0;
+  const secureCart = [];
+
+  for (const item of data.cart) {
+    const dbProduct = await prisma.product.findUnique({
+      where: { id: item.id },
+      select: { price: true, name: true },
+    });
+
+    if (!dbProduct) {
+      throw new Error(`Produto não encontrado: ${item.name}`);
+    }
+
+    const itemPrice = Number(dbProduct.price);
+    realTotal += itemPrice * item.quantity;
+
+    secureCart.push({
+      productId: item.id,
+      name: dbProduct.name, // Usa o nome real do banco de dados
+      price: itemPrice, // Usa o preço real do banco de dados
+      quantity: item.quantity,
+    });
+  }
+
   const order = await prisma.order.create({
     data: {
       customerName: data.customerName,
@@ -136,15 +189,10 @@ export async function createOrder(data: CreateOrderData) {
       address: data.address,
       paymentMethod: data.paymentMethod,
       changeFor: data.changeFor,
-      total: data.total,
+      total: realTotal, // Usa o total seguro calculado acima
       status: "PENDENTE",
       items: {
-        create: data.cart.map((item) => ({
-          productId: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        })),
+        create: secureCart,
       },
     },
   });
@@ -153,6 +201,7 @@ export async function createOrder(data: CreateOrderData) {
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: string) {
+  await verifyAdmin();
   await prisma.order.update({
     where: { id: orderId },
     data: { status: newStatus },
@@ -165,6 +214,7 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
 // --- ZERAR SISTEMA ---
 export async function clearAllOrders() {
   try {
+    await verifyAdmin();
     await prisma.$transaction([
       prisma.orderItem.deleteMany({}),
       prisma.order.deleteMany({}),
