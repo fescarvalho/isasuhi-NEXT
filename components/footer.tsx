@@ -29,7 +29,7 @@ export function Footer() {
         <small className="text-[10px] opacity-40 hover:opacity-100 transition-opacity mt-1">
           Desenvolvido por{" "}
           <a
-            href="https://www.linkedin.com/in/fecarvalhodev/"
+            href="https://fescarvpage.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-300 hover:text-white underline decoration-dotted underline-offset-2 transition-colors"
