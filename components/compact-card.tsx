@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/store/cart-store";
 import { Plus } from "lucide-react";
+import Image from "next/image";
 
 interface ProductProps {
   product: {
@@ -25,11 +26,13 @@ export function CompactCard({ product }: ProductProps) {
     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm flex items-center gap-3 h-28">
       {/* ✅ 1. ÁREA DA FOTO (NOVA) */}
       {product.imageUrl && (
-        <div className="w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100">
-          <img
+        <div className="w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100 relative">
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="80px"
           />
         </div>
       )}

@@ -53,12 +53,14 @@ export function PromoBanner({ product }: PromoBannerProps) {
         >
             {/* Image Wrapper */}
             {product.imageUrl ? (
-                <div className="w-full relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                <div className="w-full relative aspect-[16/6] md:aspect-[21/9] overflow-hidden">
+                    <Image
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-auto block opacity-100 group-hover:scale-[1.01] transition-transform duration-700"
+                        fill
+                        priority
+                        className="object-cover opacity-100 group-hover:scale-[1.01] transition-transform duration-700"
+                        sizes="100vw"
                     />
                 </div>
             ) : (
