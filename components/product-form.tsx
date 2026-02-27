@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { saveProduct } from "@/app/actions";
 import { ImageUpload } from "@/components/image-upload";
-import { Save, Star } from "lucide-react";
+import { Save, Star, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -21,6 +21,7 @@ interface Product {
   imageUrl: string | null;
   categoryId: string;
   isFeatured: boolean;
+  isBanner: boolean;
 }
 
 interface ProductFormProps {
@@ -48,7 +49,7 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
           router.refresh();
         }, 500);
       } else {
-        toast.error("Houve um problema ao salvar.");
+        toast.error(result?.error || "Houve um problema ao salvar.");
       }
     } catch (error) {
       console.error(error);
@@ -140,35 +141,69 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
         </div>
 
         {/* --- DESTAQUE --- */}
-        <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100 transition-all hover:bg-orange-100/50">
-          <div className="relative flex items-center">
-            <input
-              type="checkbox"
-              id="isFeatured"
-              name="isFeatured"
-              defaultChecked={!!product?.isFeatured}
-              className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:border-orange-500 checked:bg-orange-500 focus:outline-none transition-all"
-            />
-            <svg
-              className="absolute h-3.5 w-3.5 pointer-events-none hidden peer-checked:block stroke-white mt-1 ml-0.5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100 transition-all hover:bg-orange-100/50">
+            <div className="relative flex items-center">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                name="isFeatured"
+                defaultChecked={!!product?.isFeatured}
+                className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:border-orange-500 checked:bg-orange-500 focus:outline-none transition-all"
+              />
+              <svg
+                className="absolute h-3.5 w-3.5 pointer-events-none hidden peer-checked:block stroke-white mt-1 ml-0.5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <label
+              htmlFor="isFeatured"
+              className="text-sm font-bold text-gray-700 cursor-pointer select-none flex items-center gap-2"
             >
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+              <Star size={16} className="text-orange-500 fill-orange-500" />
+              Exibir em Os Mais Pedidos (Destaques)
+            </label>
           </div>
-          <label
-            htmlFor="isFeatured"
-            className="text-sm font-bold text-gray-700 cursor-pointer select-none flex items-center gap-2"
-          >
-            <Star size={16} className="text-orange-500 fill-orange-500" />
-            Exibir em Os Mais Pedidos (Destaques)
-          </label>
+
+          {/* --- BANNER --- */}
+          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100 transition-all hover:bg-blue-100/50">
+            <div className="relative flex items-center">
+              <input
+                type="checkbox"
+                id="isBanner"
+                name="isBanner"
+                defaultChecked={!!product?.isBanner}
+                className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:border-blue-500 checked:bg-blue-500 focus:outline-none transition-all"
+              />
+              <svg
+                className="absolute h-3.5 w-3.5 pointer-events-none hidden peer-checked:block stroke-white mt-1 ml-0.5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <label
+              htmlFor="isBanner"
+              className="text-sm font-bold text-gray-700 cursor-pointer select-none flex items-center gap-2"
+            >
+              <Flame size={16} className="text-blue-500 fill-blue-500" />
+              Exibir como Banner Promocional no Topo
+            </label>
+          </div>
         </div>
       </div>
 

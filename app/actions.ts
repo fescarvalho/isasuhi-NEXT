@@ -40,9 +40,11 @@ export async function saveProduct(formData: FormData) {
     const categoryId = formData.get("categoryId") as string;
     const imageUrl = formData.get("imageUrl") as string;
 
-    // Captura o checkbox (vem "on" do HTML ou "true" se enviado via JS)
+    // Captura os checkboxes
     const isFeatured =
       formData.get("isFeatured") === "on" || formData.get("isFeatured") === "true";
+    const isBanner =
+      formData.get("isBanner") === "on" || formData.get("isBanner") === "true";
 
     // Formata o nome da categoria para ficar Bonito (ex: "combos" -> "Combos")
     const categoryName = categoryId
@@ -70,7 +72,8 @@ export async function saveProduct(formData: FormData) {
           price,
           imageUrl,
           category: categoryConnection,
-          isFeatured, // ✅ Salva o destaque corretamente
+          isFeatured,
+          isBanner,
         },
       });
     } else {
@@ -82,7 +85,8 @@ export async function saveProduct(formData: FormData) {
           price,
           imageUrl,
           category: categoryConnection,
-          isFeatured, // ✅ Salva o destaque corretamente
+          isFeatured,
+          isBanner,
         },
       });
     }
@@ -92,10 +96,10 @@ export async function saveProduct(formData: FormData) {
 
     // ✅ SUCESSO: Retorna objeto para o front fazer o redirect
     return { success: true };
-  } catch (error) {
-    console.error("Erro ao salvar produto:", error);
+  } catch (error: any) {
+    console.error("Erro completo ao salvar produto:", error);
     // ❌ ERRO: Retorna objeto de erro
-    return { success: false, error: "Erro ao salvar no banco de dados." };
+    return { success: false, error: error.message || "Erro ao salvar no banco de dados." };
   }
 }
 
