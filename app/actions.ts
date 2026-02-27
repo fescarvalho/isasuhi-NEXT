@@ -182,6 +182,10 @@ export async function createOrder(data: CreateOrderData) {
     });
   }
 
+  // --- ADICIONA A TAXA DE ENTREGA (R$ 3,00) ---
+  const DELIVERY_FEE = 3;
+  realTotal += DELIVERY_FEE;
+
   const order = await prisma.order.create({
     data: {
       customerName: data.customerName,
@@ -189,7 +193,7 @@ export async function createOrder(data: CreateOrderData) {
       address: data.address,
       paymentMethod: data.paymentMethod,
       changeFor: data.changeFor,
-      total: realTotal, // Usa o total seguro calculado acima
+      total: realTotal, // Usa o total seguro calculado acima, com taxa
       status: "PENDENTE",
       items: {
         create: secureCart,

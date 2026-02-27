@@ -54,10 +54,18 @@ export function CartSidebar() {
 
   if (!isCartOpen) return null;
 
+  const DELIVERY_FEE = 3;
+  const finalTotal = total() + DELIVERY_FEE;
+
   const formattedTotal = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(total());
+  }).format(finalTotal);
+
+  const formattedDeliveryFee = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(DELIVERY_FEE);
 
   const handleFinishOrder = async () => {
     setLoading(true);
@@ -72,7 +80,7 @@ export function CartSidebar() {
         paymentMethod,
         changeFor: paymentMethod === "Dinheiro" ? changeFor : "",
         cart,
-        total: total(),
+        total: finalTotal,
       });
 
       const storePhone = "5522981573795";
@@ -86,6 +94,7 @@ ID: #${shortId}
 
 ${itemsList}
 
+*Taxa de entrega: ${formattedDeliveryFee}*
 *Total: ${formattedTotal}*
 --------------------------------
 *DADOS DO CLIENTE:*
@@ -333,7 +342,7 @@ ${trackingLink}`;
                     className="w-full p-4 border-2 border-yellow-200 rounded-xl font-black text-lg outline-none focus:border-yellow-500"
                     placeholder="R$ 0,00"
                   />
-                  {Number(changeFor) > 0 && Number(changeFor) < total() && (
+                  {Number(changeFor) > 0 && Number(changeFor) < finalTotal && (
                     <p className="text-red-500 text-[10px] font-black mt-2 uppercase">
                       ⚠️ Valor menor que o total
                     </p>
@@ -344,8 +353,26 @@ ${trackingLink}`;
           )}
         </div>
 
-        {/* FOOTER FIXO */}
         <div className="flex-none p-6 bg-white border-t border-gray-100 shadow-[0_-10px_25px_rgba(0,0,0,0.05)] pb-[calc(20px+env(safe-area-inset-bottom))]">
+          <div className="flex justify-between items-end mb-2 px-1">
+            <span className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
+              Subtotal
+            </span>
+            <span className="text-lg font-black text-gray-500 tracking-tighter">
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(total())}
+            </span>
+          </div>
+          <div className="flex justify-between items-end mb-4 px-1 border-b border-gray-100 pb-4">
+            <span className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
+              Taxa de Entrega
+            </span>
+            <span className="text-lg font-black text-gray-500 tracking-tighter">
+              {formattedDeliveryFee}
+            </span>
+          </div>
           <div className="flex justify-between items-end mb-6 px-1">
             <span className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">
               Total do Pedido
@@ -369,12 +396,18 @@ ${trackingLink}`;
               disabled={
                 loading ||
                 cart.length === 0 ||
-                (paymentMethod === "Dinheiro" && Number(changeFor) < total())
+                (step === 2 && (
+                  !name.trim() ||
+                  !phone.trim() ||
+                  !address.street.trim() ||
+                  !address.number.trim() ||
+                  !address.neighborhood.trim()
+                )) ||
+                (step === 3 && paymentMethod === "Dinheiro" && Number(changeFor) < finalTotal)
               }
               onClick={step < 3 ? () => setStep(step + 1) : handleFinishOrder}
-              className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${
-                step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
-              } disabled:opacity-50`}
+              className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
+                } disabled:opacity-50`}
             >
               {loading ? (
                 <Loader2 className="animate-spin" />
