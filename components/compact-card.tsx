@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/store/cart-store";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import Image from "next/image";
 
 interface ProductProps {
@@ -10,11 +11,12 @@ interface ProductProps {
     name: string;
     price: number;
     description: string;
-    imageUrl?: string | null; // ✅ Adicionado campo opcional de imagem
+    imageUrl?: string | null;
   };
+  isStoreOpen: boolean;
 }
 
-export function CompactCard({ product }: ProductProps) {
+export function CompactCard({ product, isStoreOpen }: ProductProps) {
   const addToCart = useCartStore((state) => state.addToCart);
 
   const priceFormatted = new Intl.NumberFormat("pt-BR", {
@@ -52,16 +54,26 @@ export function CompactCard({ product }: ProductProps) {
 
       {/* 3. BOTÃO (Mantido) */}
       <button
-        onClick={() =>
+        onClick={() => {
+          if (!isStoreOpen) {
+            toast.error("Loja Fechada", {
+              description: "Não estamos aceitando pedidos no momento.",
+            });
+            return;
+          }
           addToCart({
             id: product.id,
             name: product.name,
             price: product.price,
             description: product.description,
-            imageUrl: product.imageUrl || "", // ✅ Passando a imagem pro carrinho (se sua store aceitar)
-          })
-        }
-        className="bg-sushi-red text-white p-2.5 rounded-full shadow-md active:scale-90 transition-transform shrink-0"
+            imageUrl: product.imageUrl || "",
+          });
+        }}
+        disabled={!isStoreOpen}
+        className={`p-2.5 rounded-full shadow-md active:scale-90 transition-transform shrink-0 ${isStoreOpen
+          ? "bg-sushi-red text-white"
+          : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+          }`}
       >
         <Plus size={18} />
       </button>

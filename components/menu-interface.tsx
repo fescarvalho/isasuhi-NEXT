@@ -25,9 +25,10 @@ interface Category {
 
 interface MenuInterfaceProps {
   categories: Category[];
+  isStoreOpen: boolean;
 }
 
-export function MenuInterface({ categories }: MenuInterfaceProps) {
+export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
   const [activeTab, setActiveTab] = useState<string>("Destaques");
   const activeCategoryData = categories.find((cat) => cat.name === activeTab);
 
@@ -53,8 +54,8 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
           <button
             onClick={() => setActiveTab("Destaques")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all duration-300 transform ${activeTab === "Destaques"
-                ? "bg-sushi-darkRed text-white shadow-lg scale-105 ring-2 ring-red-100"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800"
+              ? "bg-sushi-darkRed text-white shadow-lg scale-105 ring-2 ring-red-100"
+              : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800"
               }`}
           >
             <Flame
@@ -70,8 +71,8 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
               key={category.id}
               onClick={() => setActiveTab(category.name)}
               className={`px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all duration-300 ${activeTab === category.name
-                  ? "bg-sushi-red text-white shadow-lg scale-105"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
+                ? "bg-sushi-red text-white shadow-lg scale-105"
+                : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
                 }`}
             >
               {category.name}
@@ -91,6 +92,7 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
                   price: Number(bannerProduct.price),
                   description: bannerProduct.description || "",
                 }}
+                isStoreOpen={isStoreOpen}
               />
             )}
 
@@ -113,6 +115,7 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
                       price: Number(product.price),
                       description: product.description || "",
                     }}
+                    isStoreOpen={isStoreOpen}
                   />
                 ))
               ) : (
@@ -140,6 +143,7 @@ export function MenuInterface({ categories }: MenuInterfaceProps) {
                     price: Number(product.price),
                     description: product.description || "",
                   }}
+                  isStoreOpen={isStoreOpen}
                 />
               ))}
             </div>

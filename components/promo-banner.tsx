@@ -13,12 +13,19 @@ interface PromoBannerProps {
         description: string;
         imageUrl?: string | null;
     };
+    isStoreOpen: boolean;
 }
 
-export function PromoBanner({ product }: PromoBannerProps) {
+export function PromoBanner({ product, isStoreOpen }: PromoBannerProps) {
     const addToCart = useCartStore((state) => state.addToCart);
 
     const handleAddToCart = () => {
+        if (!isStoreOpen) {
+            toast.error("Loja Fechada", {
+                description: "Não estamos aceitando pedidos no momento.",
+            });
+            return;
+        }
         addToCart({
             id: product.id,
             name: product.name,
@@ -49,7 +56,10 @@ export function PromoBanner({ product }: PromoBannerProps) {
     return (
         <div
             onClick={handleAddToCart}
-            className="group relative w-full bg-gray-900 rounded-[24px] md:rounded-[32px] overflow-hidden mb-12 cursor-pointer transition-all duration-500 ring-4 ring-sushi-red/20 shadow-[0_0_60px_-10px_rgba(239,68,68,0.7)] hover:shadow-[0_0_80px_-5px_rgba(239,68,68,0.8)]"
+            className={`group relative w-full rounded-[24px] md:rounded-[32px] overflow-hidden mb-12 transition-all duration-500 ring-4 ${isStoreOpen
+                    ? "bg-gray-900 cursor-pointer ring-sushi-red/20 shadow-[0_0_60px_-10px_rgba(239,68,68,0.7)] hover:shadow-[0_0_80px_-5px_rgba(239,68,68,0.8)]"
+                    : "bg-gray-800 cursor-not-allowed ring-gray-500/20 grayscale opacity-80 shadow-none"
+                }`}
         >
             {/* Image Wrapper */}
             {product.imageUrl ? (
@@ -84,7 +94,11 @@ export function PromoBanner({ product }: PromoBannerProps) {
                         e.stopPropagation();
                         handleAddToCart();
                     }}
-                    className="bg-sushi-red text-white px-4 py-2 md:px-7 md:py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-sm flex items-center gap-2 hover:bg-white hover:text-sushi-red transition-all transform active:scale-95 shadow-xl border border-white/10"
+                    disabled={!isStoreOpen}
+                    className={`px-4 py-2 md:px-7 md:py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-sm flex items-center gap-2 transition-all transform active:scale-95 shadow-xl border border-white/10 ${isStoreOpen
+                            ? "bg-sushi-red text-white hover:bg-white hover:text-sushi-red"
+                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        }`}
                 >
                     COMPRAR
                     <Plus size={14} className="md:w-5 md:h-5" strokeWidth={4} />

@@ -37,11 +37,14 @@ export default async function Home() {
 
       <Header />
 
-      <MenuInterface categories={JSON.parse(JSON.stringify(categories))} />
+      <MenuInterface
+        categories={JSON.parse(JSON.stringify(categories))}
+        isStoreOpen={isStoreOpen}
+      />
 
       <Footer />
       <CartFloat />
-      <CartSidebar />
+      <CartSidebar isStoreOpen={isStoreOpen} />
     </main>
   );
 }

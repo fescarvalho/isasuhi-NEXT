@@ -14,7 +14,11 @@ import {
 import { createOrder } from "@/app/actions";
 import Image from "next/image";
 
-export function CartSidebar() {
+interface CartSidebarProps {
+  isStoreOpen: boolean;
+}
+
+export function CartSidebar({ isStoreOpen }: CartSidebarProps) {
   const {
     cart,
     isCartOpen,
@@ -395,6 +399,7 @@ ${trackingLink}`;
             <button
               disabled={
                 loading ||
+                !isStoreOpen ||
                 cart.length === 0 ||
                 (step === 2 && (
                   !name.trim() ||
@@ -406,17 +411,22 @@ ${trackingLink}`;
                 (step === 3 && paymentMethod === "Dinheiro" && Number(changeFor) < finalTotal)
               }
               onClick={step < 3 ? () => setStep(step + 1) : handleFinishOrder}
-              className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
+              className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${!isStoreOpen ? "bg-gray-400 text-gray-200 cursor-not-allowed" :
+                  step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
                 } disabled:opacity-50`}
             >
               {loading ? (
                 <Loader2 className="animate-spin" />
               ) : (
                 <>
-                  {step === 1 && "Continuar"}
-                  {step === 2 && "Pagamento"}
-                  {step === 3 && "Finalizar no Zap"}
-                  {step < 3 && <ChevronRight size={20} strokeWidth={3} />}
+                  {!isStoreOpen ? "LOJA FECHADA" : (
+                    <>
+                      {step === 1 && "Continuar"}
+                      {step === 2 && "Pagamento"}
+                      {step === 3 && "Finalizar no Zap"}
+                      {step < 3 && <ChevronRight size={20} strokeWidth={3} />}
+                    </>
+                  )}
                 </>
               )}
             </button>

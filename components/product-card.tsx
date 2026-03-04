@@ -13,16 +13,23 @@ interface ProductProps {
     description: string;
     imageUrl?: string | null;
   };
+  isStoreOpen: boolean;
 }
 
-export function ProductCard({ product }: ProductProps) {
+export function ProductCard({ product, isStoreOpen }: ProductProps) {
   const addToCart = useCartStore((state) => state.addToCart);
 
   const handleAddToCart = () => {
-    addToCart({ 
-      id: product.id, 
-      name: product.name, 
-      price: product.price, 
+    if (!isStoreOpen) {
+      toast.error("Loja Fechada", {
+        description: "Não estamos aceitando pedidos no momento.",
+      });
+      return;
+    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
       description: product.description,
       imageUrl: product.imageUrl // <--- Mantive ativo para aparecer no carrinho
     });
@@ -30,7 +37,7 @@ export function ProductCard({ product }: ProductProps) {
     toast.success(`${product.name} adicionado!`, {
       description: "Item salvo na sua sacola.",
       duration: 3000,
-      icon: <ShoppingBag className="text-green-600" size={18} />, 
+      icon: <ShoppingBag className="text-green-600" size={18} />,
       action: {
         label: "Ver Sacola",
         onClick: () => {
@@ -48,7 +55,7 @@ export function ProductCard({ product }: ProductProps) {
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
-      
+
       {/* Área da Imagem Otimizada (h-56 para dar destaque) */}
       <div className="h-56 w-full bg-gray-100 relative overflow-hidden">
         {product.imageUrl ? (
@@ -62,11 +69,11 @@ export function ProductCard({ product }: ProductProps) {
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-            <ShoppingBag size={32} strokeWidth={1.5} className="mb-2 opacity-50"/>
+            <ShoppingBag size={32} strokeWidth={1.5} className="mb-2 opacity-50" />
             <span className="text-xs font-medium">Sem imagem</span>
           </div>
         )}
-        
+
         {/* Gradiente para o texto brilhar mais */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
       </div>
@@ -77,11 +84,11 @@ export function ProductCard({ product }: ProductProps) {
             {product.name}
           </h3>
         </div>
-        
+
         <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1 font-sans line-clamp-3">
           {product.description}
         </p>
-        
+
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-dashed border-gray-100">
           <div className="text-sushi-darkRed text-xl font-bold font-display">
             {priceFormatted}
@@ -89,8 +96,12 @@ export function ProductCard({ product }: ProductProps) {
 
           <button
             onClick={handleAddToCart}
-            className="bg-sushi-red text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 hover:scale-110 active:scale-95 transition-all duration-200"
-            title="Adicionar à sacola"
+            disabled={!isStoreOpen}
+            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${isStoreOpen
+                ? "bg-sushi-red text-white hover:bg-red-700 hover:scale-110 active:scale-95"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+              }`}
+            title={isStoreOpen ? "Adicionar à sacola" : "Loja Fechada"}
           >
             <Plus size={20} strokeWidth={3} />
           </button>
