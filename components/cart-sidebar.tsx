@@ -75,7 +75,7 @@ export function CartSidebar({ isStoreOpen }: CartSidebarProps) {
     setLoading(true);
 
     try {
-      const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood}${address.complement ? ` (${address.complement})` : ""}`;
+      const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood}${address.complement ? ` (${address.complement})` : ""} - Natividade - RJ`;
 
       const result = await createOrder({
         customerName: name,
@@ -281,6 +281,23 @@ ${trackingLink}`;
                   className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg outline-none focus:border-sushi-red"
                   placeholder="COMPLEMENTO (OPCIONAL)"
                 />
+
+                <div className="space-y-2">
+                  <div className="relative">
+                    <input
+                      value="NATIVIDADE - RJ"
+                      readOnly
+                      className="w-full border-2 border-gray-100 p-4 rounded-xl font-black text-lg bg-gray-50 text-gray-400 cursor-not-allowed outline-none"
+                      placeholder="CIDADE"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-sushi-red uppercase tracking-widest">
+                      FIXO
+                    </span>
+                  </div>
+                  <p className="flex items-center gap-2 text-[10px] font-black text-sushi-red uppercase tracking-wider ml-1 animate-pulse">
+                    <span className="text-sm">📍</span> Entrega apenas em Natividade
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -412,7 +429,7 @@ ${trackingLink}`;
               }
               onClick={step < 3 ? () => setStep(step + 1) : handleFinishOrder}
               className={`flex-1 h-16 rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${!isStoreOpen ? "bg-gray-400 text-gray-200 cursor-not-allowed" :
-                  step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
+                step === 3 ? "bg-green-600 text-white" : "bg-sushi-red text-white"
                 } disabled:opacity-50`}
             >
               {loading ? (
