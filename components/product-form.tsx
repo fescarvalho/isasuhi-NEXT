@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { saveProduct } from "@/app/actions";
+import { saveProduct, deleteProduct } from "@/app/actions";
 import { ImageUpload } from "@/components/image-upload";
-import { Save, Star, Flame } from "lucide-react";
+import { Save, Star, Flame, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -207,13 +207,43 @@ export function ProductForm({ product, categories, isNew }: ProductFormProps) {
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition flex justify-center items-center gap-2"
-      >
-        <Save size={20} />
-        {isNew ? "Cadastrar Produto" : "Salvar Alterações"}
-      </button>
+      <div className="flex flex-col md:flex-row gap-4">
+        {!isNew && product && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (!window.confirm("Certeza que deseja excluir este produto?")) return;
+              try {
+                const fd = new FormData();
+                fd.append("id", product.id);
+                const result = await deleteProduct(fd);
+                if (result?.success) {
+                  toast.success("Produto excluído com sucesso!");
+                  setTimeout(() => {
+                    router.push("/admin/produtos");
+                    router.refresh();
+                  }, 500);
+                } else {
+                  toast.error("Erro ao excluir produto.");
+                }
+              } catch {
+                toast.error("Erro ao tentar excluir.");
+              }
+            }}
+            className="w-full md:w-auto bg-red-100 text-red-600 font-bold py-4 px-6 rounded-xl hover:bg-red-200 transition flex justify-center items-center gap-2"
+          >
+            <Trash2 size={20} />
+            Excluir
+          </button>
+        )}
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition flex justify-center items-center gap-2 flex-1"
+        >
+          <Save size={20} />
+          {isNew ? "Cadastrar Produto" : "Salvar Alterações"}
+        </button>
+      </div>
     </form>
   );
 }

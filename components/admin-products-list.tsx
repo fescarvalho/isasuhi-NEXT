@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Search, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Search, Image as ImageIcon, Trash2 } from "lucide-react";
+import { deleteProduct } from "@/app/actions";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -33,6 +35,24 @@ export function AdminProductsList({ products, categories }: AdminProductsListPro
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  async function handleDelete(id: string) {
+    if (!window.confirm("Certeza que deseja excluir este produto?")) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("id", id);
+      const result = await deleteProduct(formData);
+
+      if (result?.success) {
+        toast.success("Produto excluído com sucesso!");
+      } else {
+        toast.error("Erro ao excluir produto.");
+      }
+    } catch (error) {
+      toast.error("Ocorreu um erro ao tentar excluir o produto.");
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -113,13 +133,21 @@ export function AdminProductsList({ products, categories }: AdminProductsListPro
               </div>
             </div>
 
-            {/* 3. BOTÃO EDITAR */}
-            <Link
-              href={`/admin/produtos/${product.id}`}
-              className="p-3 bg-gray-50 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors shrink-0"
-            >
-              <Pencil size={20} />
-            </Link>
+            {/* 3. BOTÕES AÇÕES */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href={`/admin/produtos/${product.id}`}
+                className="p-3 bg-gray-50 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors"
+              >
+                <Pencil size={20} />
+              </Link>
+              <button
+                onClick={() => handleDelete(product.id)}
+                className="p-3 bg-gray-50 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
           </div>
         ))}
 
