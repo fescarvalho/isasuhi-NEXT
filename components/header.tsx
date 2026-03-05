@@ -4,9 +4,9 @@ export function Header() {
   return (
     <header className="flex flex-col items-center pt-10 pb-6 px-4 text-center">
 
-      <div className="relative w-[280px] md:w-[360px] h-[180px] md:h-[220px] mb-3 max-w-full">
+      <div className="relative w-[380px] md:w-[500px] h-[240px] md:h-[320px] mb-3 max-w-full">
         <Image
-          src="/logo.png"
+          src="/logo-transparente.png"
           alt="Isa Sushi Logo"
           fill
           className="object-contain"

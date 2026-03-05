@@ -8,8 +8,8 @@ export function SplashScreen() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFade(true), 1400);
-    const hideTimer = setTimeout(() => setShow(false), 1800);
+    const fadeTimer = setTimeout(() => setFade(true), 800);
+    const hideTimer = setTimeout(() => setShow(false), 1100);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
@@ -20,21 +20,21 @@ export function SplashScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-[#FAF8F5] transition-opacity duration-400 ${fade ? "opacity-0" : "opacity-100"
+      className={`fixed left-0 top-0 flex h-[100dvh] w-screen items-center justify-center bg-white transition-all duration-400 ${fade ? "opacity-0 pointer-events-none -z-10" : "opacity-100 z-[9999]"
         }`}
     >
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-32 h-32 flex items-center justify-center animate-appear">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="relative flex h-64 w-64 items-center justify-center animate-appear">
+          <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-sushi-red border-t-transparent" />
           <Image
-            src="/logo.png"
+            src="/logo-transparente.png"
             alt="Isa Sushi"
-            width={120}
-            height={120}
+            width={200}
+            height={200}
             className="object-contain"
             priority
           />
         </div>
-        <div className="h-0.5 w-12 bg-sushi-red/30 rounded-full animate-pulse" />
       </div>
     </div>
   );

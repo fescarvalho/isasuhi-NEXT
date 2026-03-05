@@ -22,7 +22,7 @@ export default async function Home() {
   const categories = await getMenu(); //
 
   return (
-    <main className="min-h-screen bg-white relative">
+    <main className="min-h-screen relative">
       {!isStoreOpen && (
         <div className="bg-red-600 text-white w-full p-4 text-center sticky top-0 z-100 shadow-2xl flex flex-col items-center justify-center">
           <div className="flex items-center gap-2 font-bold text-lg">
