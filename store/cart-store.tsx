@@ -20,6 +20,7 @@ interface CartState {
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, action: "increase" | "decrease") => void;
+  updateObservation: (productId: string, observation: string) => void;
   total: () => number;
   clearCart: () => void;
   toggleCart: () => void; // Novo: abre/fecha o modal
@@ -66,6 +67,13 @@ export const useCartStore = create<CartState>()(
               return item;
             })
             .filter((item) => item.quantity > 0),
+        })),
+
+      updateObservation: (id, observation) =>
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.id === id ? { ...item, observation } : item,
+          ),
         })),
 
       total: () => get().cart.reduce((acc, item) => acc + item.price * item.quantity, 0),

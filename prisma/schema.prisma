@@ -50,10 +50,11 @@ model OrderItem {
   orderId String
   order   Order  @relation(fields: [orderId], references: [id])
 
-  productId String
-  name      String
-  quantity  Int
-  price     Float
+  productId   String
+  name        String
+  quantity    Int
+  price       Float
+  observation String?
 }
 
 model StoreSettings {

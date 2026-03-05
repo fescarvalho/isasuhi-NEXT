@@ -75,11 +75,11 @@ export function ProductCard({ product, isStoreOpen }: ProductProps) {
       </div>
 
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="text-gray-800 font-bold text-[15px] font-display leading-snug group-hover:text-sushi-red transition-colors line-clamp-2 mb-1.5">
+        <h3 className="text-gray-800 font-bold text-xl font-display leading-snug group-hover:text-sushi-red transition-colors line-clamp-2 mb-1.5">
           {product.name}
         </h3>
 
-        <p className="text-gray-400 text-[13px] leading-relaxed mb-3 flex-1 line-clamp-2">
+        <p className="text-gray-400 text-base leading-relaxed mb-3 flex-1 line-clamp-2">
           {product.description}
         </p>
 
@@ -92,8 +92,8 @@ export function ProductCard({ product, isStoreOpen }: ProductProps) {
             onClick={handleAddToCart}
             disabled={!isStoreOpen}
             className={`px-4 py-2 rounded-lg text-[12px] font-bold flex items-center gap-1.5 active:scale-95 transition-all duration-200 ${isStoreOpen
-                ? "bg-sushi-red text-white hover:bg-red-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+              ? "bg-sushi-red text-white hover:bg-red-700"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
               }`}
             title={isStoreOpen ? "Adicionar à sacola" : "Loja Fechada"}
           >

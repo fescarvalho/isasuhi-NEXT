@@ -25,6 +25,7 @@ export function CartSidebar({ isStoreOpen }: CartSidebarProps) {
     toggleCart,
 
     updateQuantity,
+    updateObservation,
     total,
     clearCart,
   } = useCartStore();
@@ -91,7 +92,18 @@ export function CartSidebar({ isStoreOpen }: CartSidebarProps) {
       const shortId = result.orderId.slice(-4).toUpperCase();
       const siteUrl = window.location.origin;
       const trackingLink = `${siteUrl}/pedido/${result.orderId}`;
-      const itemsList = cart.map((item) => `${item.quantity}x ${item.name}`).join("\n");
+      const itemsList = cart.map((item) => {
+        const itemTotal = new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(item.price * item.quantity);
+
+        let text = `${item.quantity}x ${item.name} (${itemTotal})`;
+        if (item.observation) {
+          text += `\n   ┗ Obs: _${item.observation}_`;
+        }
+        return text;
+      }).join("\n");
 
       const message = `*NOVO PEDIDO REALIZADO* 🍣
 ID: #${shortId}
@@ -173,49 +185,60 @@ ${trackingLink}`;
           {step === 1 && (
             <div className="space-y-4">
               {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 items-center bg-gray-50/50 p-3 rounded-2xl border border-gray-100"
-                >
-                  <div className="h-20 w-20 flex-shrink-0 rounded-xl relative overflow-hidden border border-gray-200">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full bg-gray-100 text-gray-300">
-                        <ShoppingBag />
-                      </div>
-                    )}
+                <div key={item.id} className="space-y-2 pb-4 border-b border-gray-100 last:border-0">
+                  <div className="flex gap-4 items-center bg-gray-50/50 p-3 rounded-2xl border border-gray-100">
+                    <div className="h-20 w-20 flex-shrink-0 rounded-xl relative overflow-hidden border border-gray-200">
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full bg-gray-100 text-gray-300">
+                          <ShoppingBag />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-black text-gray-800 text-base leading-tight line-clamp-2 uppercase">
+                        {item.name}
+                      </h4>
+                      <p className="text-gray-400 text-xs mt-0.5 font-medium">
+                        {item.description}
+                      </p>
+                      <p className="font-black text-sushi-red text-lg mt-1">
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(item.price)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, "increase")}
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-green-600 shadow-sm"
+                      >
+                        +
+                      </button>
+                      <span className="font-black text-sm">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, "decrease")}
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-red-600 shadow-sm"
+                      >
+                        -
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-black text-gray-800 text-base leading-tight line-clamp-2 uppercase">
-                      {item.name}
-                    </h4>
-                    <p className="font-black text-sushi-red text-lg mt-1">
-                      {new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      }).format(item.price)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, "increase")}
-                      className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-green-600 shadow-sm"
-                    >
-                      +
-                    </button>
-                    <span className="font-black text-sm">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, "decrease")}
-                      className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full font-black text-red-600 shadow-sm"
-                    >
-                      -
-                    </button>
+                  {/* Campo de Observação */}
+                  <div className="mt-2 mb-2">
+                    <textarea
+                      placeholder="Alguma observação? (ex: sem cebola, ponto da carne...)"
+                      value={item.observation || ""}
+                      onChange={(e) => updateObservation(item.id, e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-100 bg-white text-sm font-medium outline-none focus:border-sushi-red transition-colors resize-none h-16"
+                    />
                   </div>
                 </div>
               ))}
@@ -449,7 +472,7 @@ ${trackingLink}`;
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

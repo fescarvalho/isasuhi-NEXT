@@ -149,7 +149,7 @@ interface CreateOrderData {
   address: string;
   paymentMethod: string;
   changeFor?: string;
-  cart: { id: string; name: string; price: number; quantity: number }[];
+  cart: { id: string; name: string; price: number; quantity: number; observation?: string }[];
   total: number;
 }
 
@@ -183,6 +183,7 @@ export async function createOrder(data: CreateOrderData) {
       name: dbProduct.name, // Usa o nome real do banco de dados
       price: itemPrice, // Usa o preço real do banco de dados
       quantity: item.quantity,
+      observation: item.observation,
     });
   }
 

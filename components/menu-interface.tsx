@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ProductCard } from "./product-card";
-import { CompactCard } from "./compact-card";
 import { PromoBanner } from "./promo-banner";
 import { Flame } from "lucide-react";
 
@@ -135,7 +134,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activeCategoryData.products.map((product) => (
-                <CompactCard
+                <ProductCard
                   key={product.id}
                   product={{
                     ...product,
