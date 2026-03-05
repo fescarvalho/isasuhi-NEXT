@@ -190,3 +190,8 @@ nextjs-portal {
     transform: scaleX(1);
   }
 }
+
+.tab-underline {
+  animation: slideIn 0.5s ease-out forwards;
+  transform-origin: left;
+}

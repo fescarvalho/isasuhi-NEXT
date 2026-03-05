@@ -59,7 +59,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
             />
             Destaques
             {activeTab === "Destaques" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full" style={{ animation: 'slideIn 0.3s ease-out', transformOrigin: 'left' }} />
+              <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full tab-underline" />
             )}
           </button>
 
@@ -74,7 +74,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
             >
               {category.name}
               {activeTab === category.name && (
-                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full" style={{ animation: 'slideIn 0.3s ease-out', transformOrigin: 'left' }} />
+                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full tab-underline" />
               )}
             </button>
           ))}
