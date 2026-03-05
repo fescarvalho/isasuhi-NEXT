@@ -1,7 +1,6 @@
 "use client";
 
 import { useCartStore } from "@/store/cart-store";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -25,10 +24,10 @@ export function CompactCard({ product, isStoreOpen }: ProductProps) {
   }).format(product.price);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm flex items-center gap-3 h-28">
-      {/* ✅ 1. ÁREA DA FOTO (NOVA) */}
+    <div className="bg-white border border-gray-100 rounded-lg p-3 flex items-center gap-3 h-28 hover:border-gray-200 transition-colors">
+      {/* Foto */}
       {product.imageUrl && (
-        <div className="w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100 relative">
+        <div className="w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-50 relative">
           <Image
             src={product.imageUrl}
             alt={product.name}
@@ -39,20 +38,20 @@ export function CompactCard({ product, isStoreOpen }: ProductProps) {
         </div>
       )}
 
-      {/* 2. TEXTO (Mantido, mas agora flexível) */}
+      {/* Texto */}
       <div className="flex-1 h-full flex flex-col justify-between py-1">
         <div>
-          <h3 className="font-bold text-gray-800 text-sm mb-1 line-clamp-1">
+          <h3 className="font-semibold text-gray-800 text-sm mb-0.5 line-clamp-1">
             {product.name}
           </h3>
-          <p className="text-xs text-gray-500 line-clamp-2 leading-tight">
+          <p className="text-xs text-gray-400 line-clamp-2 leading-tight">
             {product.description}
           </p>
         </div>
-        <div className="font-bold text-sushi-red text-sm mt-1">{priceFormatted}</div>
+        <div className="font-bold text-sushi-red text-sm">{priceFormatted}</div>
       </div>
 
-      {/* 3. BOTÃO (Mantido) */}
+      {/* Botão */}
       <button
         onClick={() => {
           if (!isStoreOpen) {
@@ -70,12 +69,12 @@ export function CompactCard({ product, isStoreOpen }: ProductProps) {
           });
         }}
         disabled={!isStoreOpen}
-        className={`p-2.5 rounded-full shadow-md active:scale-90 transition-transform shrink-0 ${isStoreOpen
-          ? "bg-sushi-red text-white"
-          : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+        className={`text-[11px] font-semibold px-3 py-2 rounded-lg active:scale-95 transition-transform shrink-0 ${isStoreOpen
+            ? "bg-sushi-red text-white hover:bg-red-700"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
           }`}
       >
-        <Plus size={18} />
+        + Pedir
       </button>
     </div>
   );

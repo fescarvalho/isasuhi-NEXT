@@ -34,48 +34,48 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
 
   const allProducts = categories.flatMap((cat) => cat.products);
 
-  // ============================================================
-  // 🚀 BANNER PROMOCIONAL: PEGA O PRIMEIRO MARCADO COMO BANNER
-  // ============================================================
   const bannerProduct = allProducts.find((p) => p.isBanner === true);
 
-  // ============================================================
-  // 🚀 NOVA LÓGICA DINÂMICA: FILTRA PELO CAMPO 'isFeatured'
-  // ============================================================
   const highlights = allProducts
-    .filter((p) => p.isFeatured === true) // Filtra o que você marcou no banco
+    .filter((p) => p.isFeatured === true)
     .slice(0, 6);
 
   return (
     <div>
-      {/* --- MENU DE NAVEGAÇÃO --- */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm shadow-sm pt-4 pb-4 mb-8">
-        <div className="flex overflow-x-auto gap-3 px-4 no-scrollbar md:justify-center justify-start items-center">
+      {/* --- NAVEGAÇÃO COM UNDERLINE --- */}
+      <div className="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-gray-200/50 pt-2 pb-0 mb-8">
+        <div className="flex overflow-x-auto gap-1 px-4 no-scrollbar md:justify-center justify-start items-end">
           <button
             onClick={() => setActiveTab("Destaques")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all duration-300 transform ${activeTab === "Destaques"
-              ? "bg-sushi-darkRed text-white shadow-lg scale-105 ring-2 ring-red-100"
-              : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800"
+            className={`relative flex items-center gap-1.5 px-4 py-3 whitespace-nowrap text-sm font-semibold transition-all duration-300 ${activeTab === "Destaques"
+              ? "text-sushi-red"
+              : "text-gray-400 hover:text-gray-700"
               }`}
           >
             <Flame
-              size={18}
-              className={activeTab === "Destaques" ? "text-orange-400 animate-pulse" : ""}
+              size={16}
+              className={activeTab === "Destaques" ? "text-orange-500" : ""}
               fill={activeTab === "Destaques" ? "currentColor" : "none"}
             />
             Destaques
+            {activeTab === "Destaques" && (
+              <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full" style={{ animation: 'slideIn 0.3s ease-out', transformOrigin: 'left' }} />
+            )}
           </button>
 
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setActiveTab(category.name)}
-              className={`px-6 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all duration-300 ${activeTab === category.name
-                ? "bg-sushi-red text-white shadow-lg scale-105"
-                : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900"
+              className={`relative px-4 py-3 whitespace-nowrap text-sm font-semibold transition-all duration-300 ${activeTab === category.name
+                ? "text-sushi-red"
+                : "text-gray-400 hover:text-gray-700"
                 }`}
             >
               {category.name}
+              {activeTab === category.name && (
+                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full" style={{ animation: 'slideIn 0.3s ease-out', transformOrigin: 'left' }} />
+              )}
             </button>
           ))}
         </div>
@@ -84,7 +84,6 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
       <div className="px-4 pb-32 animate-fade-up max-w-5xl mx-auto min-h-[60vh]">
         {activeTab === "Destaques" && (
           <div>
-            {/* RENDERIZA O BANNER SE HOUVER UM PRODUTO MARCADO */}
             {bannerProduct && (
               <PromoBanner
                 product={{
@@ -97,15 +96,15 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
             )}
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-orange-100 p-2 rounded-full">
-                <Flame className="text-orange-500" size={24} />
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
+                <Flame className="text-white" size={18} />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 font-display">
                 Os Mais Pedidos
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {highlights.length > 0 ? (
                 highlights.map((product) => (
                   <ProductCard
@@ -131,7 +130,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
 
         {activeTab !== "Destaques" && activeCategoryData && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 font-display mb-6 pl-2 border-l-4 border-sushi-red">
+            <h2 className="text-2xl font-bold text-gray-800 font-display mb-6 pl-3 border-l-[3px] border-sushi-red">
               {activeCategoryData.name}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

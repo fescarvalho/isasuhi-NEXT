@@ -1,9 +1,9 @@
 "use client";
 
 import { useCartStore } from "@/store/cart-store";
-import { Plus, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image"; // Otimização do Next.js
+import Image from "next/image";
 
 interface ProductProps {
   product: {
@@ -31,7 +31,7 @@ export function ProductCard({ product, isStoreOpen }: ProductProps) {
       name: product.name,
       price: product.price,
       description: product.description,
-      imageUrl: product.imageUrl // <--- Mantive ativo para aparecer no carrinho
+      imageUrl: product.imageUrl
     });
 
     toast.success(`${product.name} adicionado!`, {
@@ -54,56 +54,50 @@ export function ProductCard({ product, isStoreOpen }: ProductProps) {
   }).format(product.price);
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
+    <div className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 flex flex-col h-full relative">
 
-      {/* Área da Imagem Otimizada (h-56 para dar destaque) */}
-      <div className="h-56 w-full bg-gray-100 relative overflow-hidden">
+      {/* Imagem */}
+      <div className="h-52 w-full bg-gray-50 relative overflow-hidden">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
-            fill // Faz a imagem preencher a div pai
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
-            // O segredo da performance: carrega imagens menores no celular
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-            <ShoppingBag size={32} strokeWidth={1.5} className="mb-2 opacity-50" />
-            <span className="text-xs font-medium">Sem imagem</span>
+            <ShoppingBag size={28} strokeWidth={1.5} className="mb-1.5 opacity-40" />
+            <span className="text-[11px] text-gray-400">Sem imagem</span>
           </div>
         )}
-
-        {/* Gradiente para o texto brilhar mais */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
       </div>
 
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-gray-800 font-bold text-lg font-display leading-tight group-hover:text-sushi-red transition-colors line-clamp-2">
-            {product.name}
-          </h3>
-        </div>
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="text-gray-800 font-bold text-[15px] font-display leading-snug group-hover:text-sushi-red transition-colors line-clamp-2 mb-1.5">
+          {product.name}
+        </h3>
 
-        <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1 font-sans line-clamp-3">
+        <p className="text-gray-400 text-[13px] leading-relaxed mb-3 flex-1 line-clamp-2">
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-dashed border-gray-100">
-          <div className="text-sushi-darkRed text-xl font-bold font-display">
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100/80">
+          <div className="text-sushi-darkRed text-lg font-bold font-display">
             {priceFormatted}
           </div>
 
           <button
             onClick={handleAddToCart}
             disabled={!isStoreOpen}
-            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${isStoreOpen
-                ? "bg-sushi-red text-white hover:bg-red-700 hover:scale-110 active:scale-95"
+            className={`px-4 py-2 rounded-lg text-[12px] font-bold flex items-center gap-1.5 active:scale-95 transition-all duration-200 ${isStoreOpen
+                ? "bg-sushi-red text-white hover:bg-red-700"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
               }`}
             title={isStoreOpen ? "Adicionar à sacola" : "Loja Fechada"}
           >
-            <Plus size={20} strokeWidth={3} />
+            Adicionar
           </button>
         </div>
       </div>
