@@ -12,8 +12,8 @@ import {
   Banknote,
   CalendarRange, // Novo ícone para período
 } from "lucide-react";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatInTimeZone } from "date-fns-tz";
 import { getStoreStatus, clearAllOrders } from "@/app/actions";
 import { Prisma } from "@prisma/client";
 
@@ -54,13 +54,13 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
     onde.createdAt = {};
 
     if (dataInicio) {
-      // Começa à 00:00:00 da data inicial
-      onde.createdAt.gte = new Date(`${dataInicio}T00:00:00`);
+      // Começa à 00:00:00 da data inicial (fuso BR)
+      onde.createdAt.gte = new Date(`${dataInicio}T00:00:00-03:00`);
     }
 
     if (dataFim) {
-      // Termina às 23:59:59 da data final
-      onde.createdAt.lte = new Date(`${dataFim}T23:59:59`);
+      // Termina às 23:59:59 da data final (fuso BR)
+      onde.createdAt.lte = new Date(`${dataFim}T23:59:59-03:00`);
     }
   }
 
@@ -197,7 +197,7 @@ export default async function AdminPedidos({ searchParams }: PageProps) {
                       </span>
                       <div className="flex items-center gap-1.5 text-gray-500 font-black text-xs bg-white border border-gray-200 px-3 py-1 rounded-full uppercase tracking-wider">
                         <Clock size={14} className="text-sushi-red" />
-                        {format(new Date(pedido.createdAt), "HH:mm '•' dd/MM", {
+                        {formatInTimeZone(new Date(pedido.createdAt), "America/Sao_Paulo", "HH:mm '•' dd/MM", {
                           locale: ptBR,
                         })}
                       </div>

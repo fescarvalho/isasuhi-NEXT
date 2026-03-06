@@ -14,11 +14,18 @@ import { getStoreStatus } from "@/app/actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const now = new Date();
+  const nowUtc = new Date();
+  const { toZonedTime } = await import('date-fns-tz');
+  const nowSp = toZonedTime(nowUtc, 'America/Sao_Paulo');
+
   const isStoreOpen = await getStoreStatus();
 
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const year = nowSp.getFullYear();
+  const month = String(nowSp.getMonth() + 1).padStart(2, '0');
+  const day = String(nowSp.getDate()).padStart(2, '0');
+
+  const startOfDay = new Date(`${year}-${month}-${day}T00:00:00-03:00`);
+  const startOfMonth = new Date(`${year}-${month}-01T00:00:00-03:00`);
 
   const salesToday = await prisma.order.aggregate({
     _sum: { total: true },
