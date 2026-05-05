@@ -71,7 +71,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
                 : "text-gray-400 hover:text-gray-700"
                 }`}
             >
-              {category.name}
+              {category.name === "Hot Rolls" ? "Fritos" : category.name}
               {activeTab === category.name && (
                 <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-sushi-red rounded-full tab-underline" />
               )}
@@ -130,7 +130,7 @@ export function MenuInterface({ categories, isStoreOpen }: MenuInterfaceProps) {
         {activeTab !== "Destaques" && activeCategoryData && (
           <div>
             <h2 className="text-2xl font-bold text-gray-800 font-display mb-6 pl-3 border-l-[3px] border-sushi-red">
-              {activeCategoryData.name}
+              {activeCategoryData.name === "Hot Rolls" ? "Fritos" : activeCategoryData.name}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activeCategoryData.products.map((product) => (
